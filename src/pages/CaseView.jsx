@@ -1,0 +1,197 @@
+import { useState, useMemo } from 'react'
+import HScrollArea from '../components/ui/HScrollArea'
+import { MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
+import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
+
+const TODAY = new Date()
+TODAY.setHours(0, 0, 0, 0)
+
+function getCloseStatus(expectedCloseDate, caseStatus) {
+  if (caseStatus === 'closed' || !expectedCloseDate) return null
+  const close = new Date(expectedCloseDate)
+  const diffDays = Math.ceil((close - TODAY) / 86400000)
+  if (diffDays < 0)   return { label: '已逾期',   class: 'bg-red-50 text-red-500 border border-red-100',           dot: 'bg-red-400'     }
+  if (diffDays <= 30) return { label: '即將逾期', class: 'bg-orange-50 text-orange-500 border border-orange-100',   dot: 'bg-orange-400'  }
+  return                     { label: '未逾期',   class: 'bg-emerald-50 text-emerald-600 border border-emerald-100', dot: 'bg-emerald-400' }
+}
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null
+  return Math.ceil((new Date(dateStr) - TODAY) / 86400000)
+}
+
+function DeadlineBadge({ date }) {
+  if (!date) return null
+  const days = daysUntil(date)
+  const color = days <= 2 ? 'text-red-500' : days <= 5 ? 'text-orange-500' : 'text-gray-400'
+  return (
+    <div className={`flex items-center gap-1 text-xs whitespace-nowrap ${color}`}>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="shrink-0">
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      </svg>
+      <span>下一個事件：{days <= 0 ? '已逾期' : `${days} 天後`}</span>
+      <span className="ml-0.5">{date}</span>
+    </div>
+  )
+}
+
+function CaseTypeBadge({ type }) {
+  const idx = CASE_TYPES.indexOf(type)
+  const color = CASE_TYPE_COLORS[idx >= 0 ? idx : 0]
+  return (
+    <span className="text-xs font-medium px-2 py-0.5 rounded-md" style={{ backgroundColor: color + '20', color }}>
+      {type}
+    </span>
+  )
+}
+
+function CaseCard({ c }) {
+  const closeStatus = getCloseStatus(c.expectedCloseDate, c.status)
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col gap-3 cursor-pointer">
+
+      {/* Type + close status */}
+      <div className="flex items-start justify-between gap-2">
+        <CaseTypeBadge type={c.type} />
+        {closeStatus && (
+          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md whitespace-nowrap ${closeStatus.class}`}>
+            {closeStatus.label}
+          </span>
+        )}
+      </div>
+
+      {/* Title + ID */}
+      <div className="flex flex-col gap-1.5">
+        <p className="text-sm font-semibold text-gray-800 leading-snug">{c.title}</p>
+        <p className="text-xs text-gray-400">{c.id}</p>
+      </div>
+
+      {/* Expected close date (if set and not closed) */}
+      {c.expectedCloseDate && c.status !== 'closed' && (
+        <div className="flex items-center gap-1 text-xs text-gray-400">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <span>預計結案 {c.expectedCloseDate}</span>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between flex-wrap gap-y-2 pt-3 mt-auto border-t border-gray-100">
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="w-5 h-5 rounded-full bg-[#1E3480] flex items-center justify-center shrink-0">
+            <span className="text-white font-bold" style={{ fontSize: '9px' }}>{c.lawyer}</span>
+          </div>
+          <span className="text-xs text-gray-500">{c.lawyer} 律師</span>
+        </div>
+        <DeadlineBadge date={c.nextDeadline} />
+      </div>
+    </div>
+  )
+}
+
+function KanbanColumn({ status, cases }) {
+  const overdueCount = cases.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
+  return (
+    <div className="flex flex-col gap-3 min-w-[280px] w-[280px]">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: status.color }} />
+          <span className="text-sm font-bold text-gray-700">{status.label}</span>
+          {overdueCount > 0 && (
+            <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">逾期 {overdueCount}</span>
+          )}
+        </div>
+        <span className="text-xs font-semibold text-white px-2 py-0.5 rounded-full" style={{ backgroundColor: status.color }}>
+          {cases.length}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-2xl p-3 min-h-[200px]" style={{ backgroundColor: status.bg }}>
+        {cases.length === 0 && (
+          <div className="flex items-center justify-center h-20 text-xs text-gray-300">無案件</div>
+        )}
+        {cases.map((c) => <CaseCard key={c.id} c={c} />)}
+      </div>
+    </div>
+  )
+}
+
+export default function CaseView() {
+  const [filterLawyer, setFilterLawyer] = useState('all')
+  const [filterType, setFilterType] = useState('all')
+  const [filterOverdue, setFilterOverdue] = useState(false)
+
+  const lawyers = ['all', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+
+  const filtered = useMemo(() => {
+    return MOCK_CASES.filter((c) => {
+      if (filterLawyer !== 'all' && c.lawyer !== filterLawyer) return false
+      if (filterType !== 'all' && c.type !== filterType) return false
+      if (filterOverdue) {
+        const cs = getCloseStatus(c.expectedCloseDate, c.status)
+        if (!cs || cs.label !== '已逾期') return false
+      }
+      return true
+    })
+  }, [filterLawyer, filterType, filterOverdue])
+
+  const byStatus = useMemo(() => {
+    const map = {}
+    CASE_STATUSES.forEach((s) => { map[s.key] = [] })
+    filtered.forEach((c) => { if (map[c.status]) map[c.status].push(c) })
+    return map
+  }, [filtered])
+
+  const overdueTotal = MOCK_CASES.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
+
+  return (
+    <div className="px-8 py-8 flex flex-col gap-6 h-full">
+
+      <div className="flex items-end gap-4 shrink-0">
+        <div>
+          <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Cases</p>
+          <h1 className="text-2xl font-bold text-[#1E3480]">所有案件</h1>
+        </div>
+        <div className="mb-1 h-px flex-1 bg-gradient-to-r from-[#1E3480]/20 to-transparent" />
+      </div>
+
+      <div className="flex items-center gap-4 shrink-0 flex-wrap">
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500">負責律師</label>
+          <select value={filterLawyer} onChange={(e) => setFilterLawyer(e.target.value)}
+            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white">
+            {lawyers.map((l) => <option key={l} value={l}>{l === 'all' ? '全部律師' : `${l} 律師`}</option>)}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500">案件類型</label>
+          <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
+            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white">
+            <option value="all">全部類型</option>
+            {CASE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+
+        <button onClick={() => setFilterOverdue((v) => !v)}
+          className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+            filterOverdue ? 'bg-red-500 border-red-500 text-white font-semibold' : 'border-gray-200 text-gray-500 hover:border-red-400 hover:text-red-500'
+          }`}>
+          {filterOverdue ? '✕ 僅顯示已逾期' : `僅顯示已逾期${overdueTotal > 0 ? `（${overdueTotal}）` : ''}`}
+        </button>
+
+        <span className="text-xs text-gray-400 ml-auto">共 {filtered.length} 件</span>
+      </div>
+
+      <HScrollArea>
+        <div className="flex gap-5 h-full" style={{ width: 'max-content' }}>
+          {CASE_STATUSES.map((status) => (
+            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} />
+          ))}
+        </div>
+      </HScrollArea>
+
+    </div>
+  )
+}
