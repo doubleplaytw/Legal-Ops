@@ -317,7 +317,7 @@ export const MOCK_UPCOMING_DEADLINES = [
   { id: 5, caseNo: 'C-2026-015', parties: '林○○',               cause: '勞資爭議',       relief: '仲裁請求',             caseType: '勞資糾紛', category: 'INVOICE',   date: '2026-06-02', daysLeft: 7, lawyer: 'B 律師' },
 ]
 
-export const STATUTE_TYPES = ['消滅時效', '取得時效', '追訴時效', '除斥期間']
+export const STATUTE_TYPES = ['消滅時效', '取得時效', '追訴時效', '除斥期間', '合約期間']
 
 export const MOCK_STATUTES = [
   // ── 消滅時效 ──────────────────────────────────────────────────────────
@@ -554,5 +554,72 @@ export const MOCK_STATUTES = [
     display: '6 個月',
     caseTypes: ['家事案件'],
     note: '自撤銷原因消滅後 6 個月內行使；逾期不得再主張',
+  },
+  // ── 合約期間 ──────────────────────────────────────────────────────────
+  {
+    id: 'CON-001',
+    law: '依雙方合意',
+    name: '常年法律顧問合約期間',
+    type: '合約期間',
+    years: 1,
+    days: 365,
+    display: '1 年',
+    caseTypes: ['常年法務'],
+    note: '本所標準常年顧問合約效期為 1 年，屆期前 30 日應啟動續約確認；如未於到期日前終止則視為同條件續約',
+  },
+  {
+    id: 'CON-002',
+    law: '依雙方合意',
+    name: '常年顧問合約終止通知期',
+    type: '合約期間',
+    years: null,
+    days: 30,
+    display: '30 日',
+    caseTypes: ['常年法務'],
+    note: '任一方擬終止合約，應於期滿前至少 30 日以書面通知他方；未依規定通知者須承擔違約責任',
+  },
+  {
+    id: 'CON-003',
+    law: '勞動基準法第 9-1 條',
+    name: '競業禁止條款最長期間',
+    type: '合約期間',
+    years: 2,
+    days: 730,
+    display: '2 年',
+    caseTypes: ['勞資糾紛', '商事相關'],
+    note: '離職後競業禁止期間不得逾 2 年，逾期部分無效；雇主須給予合理補償，否則約定不生效力',
+  },
+  {
+    id: 'CON-004',
+    law: '依合約約定',
+    name: '保密協議（NDA）有效期',
+    type: '合約期間',
+    years: 3,
+    days: 1095,
+    display: '3 年（常見約定）',
+    caseTypes: ['商事相關', '智慧財產', '常年法務'],
+    note: '本所常見 NDA 保密期間為 3–5 年；若未約定期間，應依誠信原則判斷合理存續期限',
+  },
+  {
+    id: 'CON-005',
+    law: '依合約約定',
+    name: '專案法律顧問合約期間',
+    type: '合約期間',
+    years: null,
+    days: 180,
+    display: '6 個月（常見約定）',
+    caseTypes: ['常年法務', '商事相關'],
+    note: '以特定專案為範圍之顧問委任，通常約定 3–6 個月；專案完成或期滿即終止，不自動續約',
+  },
+  {
+    id: 'CON-006',
+    law: '依合約約定',
+    name: '教育訓練合約服務期間',
+    type: '合約期間',
+    years: null,
+    days: 90,
+    display: '依課程安排',
+    caseTypes: ['教育訓練'],
+    note: '單次或系列課程委任合約，以課程完成為履行標準；通常附帶講義使用授權期間約定',
   },
 ]

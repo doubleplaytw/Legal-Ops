@@ -7,6 +7,7 @@ const TYPE_STYLE = {
   '取得時效': 'bg-emerald-50 text-emerald-600 border border-emerald-100',
   '追訴時效': 'bg-violet-50 text-violet-600 border border-violet-100',
   '除斥期間': 'bg-amber-50 text-amber-600 border border-amber-100',
+  '合約期間': 'bg-sky-50 text-sky-600 border border-sky-100',
 }
 
 function TypeBadge({ type }) {
@@ -32,7 +33,9 @@ function StatuteRow({ s }) {
       </td>
       <td className="px-4 py-3.5 align-top text-center whitespace-nowrap">
         <span className="text-sm font-bold text-[#1E3480]">{s.display}</span>
-        <p className="text-xs text-gray-300 mt-0.5">{s.days.toLocaleString()} 天</p>
+        {!s.years && (
+          <p className="text-xs text-gray-300 mt-0.5">{s.days.toLocaleString()} 天</p>
+        )}
       </td>
       <td className="px-4 py-3.5 align-top">
         <div className="flex flex-wrap gap-1">
