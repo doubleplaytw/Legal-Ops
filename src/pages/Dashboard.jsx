@@ -10,6 +10,7 @@ import {
   MOCK_UPCOMING_DEADLINES,
   DEADLINE_CATEGORIES,
   MOCK_CASES,
+  MOCK_CLIENT_HEALTH,
 } from '../constants/mockData'
 
 function filterByDateRange(data, from, to) {
@@ -52,7 +53,7 @@ const PIPELINE_STAGES = [
   { key: 'meeting',     label: '進行會晤', color: '#8B5CF6' },
   { key: 'quote',       label: '報價',     color: '#0D9488' },
   { key: 'signing',     label: '簽約',     color: '#F97316' },
-  { key: 'active',      label: '進行中',   color: '#1E3480', merge: ['retained', 'active'] },
+  { key: 'active',      label: '進行中',   color: '#1E3480' },
   { key: 'closed',      label: '結案',     color: '#22C55E' },
 ]
 
@@ -87,6 +88,15 @@ function PipelineChart() {
   )
 }
 
+function calcTrend(current, last, unit, lowerIsBetter = false) {
+  const diff = current - last
+  if (diff === 0) return null
+  const up = diff > 0
+  const positive = lowerIsBetter ? !up : up
+  const label = `${diff > 0 ? '+' : ''}${diff}${unit}`
+  return { label, up, positive }
+}
+
 function daysLeftColor(days) {
   if (days <= 2) return 'text-red-500 bg-red-50'
   if (days <= 4) return 'text-orange-500 bg-orange-50'
@@ -108,9 +118,32 @@ export default function Dashboard() {
   )
   const noData = [{ type: '無資料', count: 1 }]
 
+  const todayDate = new Date()
+  todayDate.setHours(0, 0, 0, 0)
+  const followUpEvents = MOCK_CLIENT_HEALTH.flatMap((client) =>
+    client.followUps
+      .filter((f) => !f.done && f.date)
+      .map((f) => ({
+        id: `fu-${client.id}-${f.id}`,
+        taskTitle: f.task,
+        date: f.date,
+        daysLeft: Math.floor((new Date(f.date) - todayDate) / 86400000),
+        category: f.category,
+        caseNo: client.caseNo,
+        parties: client.parties,
+        cause: client.cause,
+        relief: client.relief,
+        caseType: client.caseType,
+        lawyer: client.lawyer,
+      }))
+  )
+  const allEvents = [...MOCK_UPCOMING_DEADLINES, ...followUpEvents]
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 10)
+
   return (
-    <div className="px-8 py-8">
-      <div className="max-w-6xl mx-auto flex flex-col gap-8">
+    <div className="px-4 py-6 md:px-8 md:py-8">
+      <div className="max-w-6xl mx-auto flex flex-col gap-6 md:gap-8">
 
         {/* Page title */}
         <div className="flex items-end gap-4">
@@ -121,27 +154,36 @@ export default function Dashboard() {
           <div className="mb-1 h-px flex-1 bg-gradient-to-r from-[#1E3480]/20 to-transparent" />
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KpiCard label="本月預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="依預計結案日統計" />
-          <KpiCard label="本月實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月 +2 件" />
-          <KpiCard label="委任轉換率" value={MOCK_KPI.conversionRate} unit="%" sub="本月諮詢→委任" />
-          <KpiCard label="七天內到期事件" value={MOCK_KPI.upcomingDeadlines} unit="件" sub="需立即處理" />
+        {/* Section: 案件概況 */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">案件概況</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <KpiCard label="本月預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} />
+            <KpiCard label="本月實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} />
+            <KpiCard label="委任轉換率" value={MOCK_KPI.conversionRate} unit="%" sub="較上月底" trend={calcTrend(MOCK_KPI.conversionRate, MOCK_KPI.conversionRateLastMonth, '%')} />
+            <KpiCard label="七天內到期事件" value={MOCK_KPI.upcomingDeadlines} unit="件" />
+          </div>
         </div>
 
-        {/* Billing KPI Cards */}
-        <div className="grid grid-cols-2 gap-4">
-          <KpiCard label="尚未請款案件" value={MOCK_KPI.uninvoiced} unit="件" sub="委任中尚未開立帳單" />
-          <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="帳單已開立，待收款" />
+        {/* Section: 帳務概況 */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">帳務概況</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <KpiCard label="尚未請款案件" value={MOCK_KPI.uninvoiced} unit="件" sub="較上月" trend={MOCK_KPI.uninvoicedTrend} amount={MOCK_KPI.uninvoicedAmount} />
+            <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="較上月" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} />
+          </div>
         </div>
 
         {/* Upcoming Deadlines */}
         <ChartCard title="下一個事件時間點">
           <div className="overflow-y-auto max-h-[400px] flex flex-col divide-y divide-gray-50 pr-1">
-            {[...MOCK_UPCOMING_DEADLINES]
-              .sort((a, b) => a.date.localeCompare(b.date))
-              .slice(0, 10)
-              .map((item) => {
+            {allEvents.map((item) => {
                 const cat = DEADLINE_CATEGORIES[item.category]
                 return (
                   <div key={item.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
@@ -150,14 +192,21 @@ export default function Dashboard() {
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${cat.color}`}>
                           {cat.label}
                         </span>
-                        <span className="text-sm font-medium text-gray-800">{item.title}</span>
+                        <span className="text-sm font-semibold text-[#1E3480]">
+                          {item.taskTitle || item.cause}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 pl-0.5">
-                        <span className="text-xs text-gray-400">{item.caseNo}</span>
-                        <span className="text-xs text-gray-300">·</span>
-                        <span className="text-xs text-gray-400">{item.caseType}</span>
-                        <span className="text-xs text-gray-300">·</span>
-                        <span className="text-xs text-gray-400">{item.lawyer}</span>
+                      <div className="flex flex-col gap-0.5 pl-0.5">
+                        <span className="text-xs text-gray-600">{item.parties}</span>
+                        {item.taskTitle && (
+                          <span className="text-xs font-semibold text-[#1E3480]">{item.cause}</span>
+                        )}
+                        <span className="text-xs text-gray-600">{item.relief}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-300">{item.caseNo}</span>
+                          <span className="text-xs text-gray-200">·</span>
+                          <span className="text-xs text-gray-300">{item.lawyer}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0 ml-4">

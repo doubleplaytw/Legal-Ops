@@ -11,7 +11,7 @@ const SORT_OPTIONS = [
   { value: 'active',   label: '進行中案件（多→少）' },
   { value: 'deadline', label: '到期件數（多→少）' },
   { value: 'billing',  label: '計費時數（多→少）' },
-  { value: 'closed',   label: '本月結案（多→少）' },
+  { value: 'closed',   label: '本月實際結案（多→少）' },
   { value: 'cycle',    label: '平均週期（長→短）' },
   { value: 'overdue',  label: '已逾期件數（多→少）' },
 ]
@@ -89,65 +89,106 @@ function SectionLabel({ children }) {
 }
 
 function LawyerCard({ lawyer }) {
+  const attainment = lawyer.plannedCloseThisMonth > 0
+    ? Math.round((lawyer.closedThisMonth / lawyer.plannedCloseThisMonth) * 100)
+    : 0
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col shrink-0 overflow-hidden" style={{ width: 'var(--card-width)' }}>
 
       {/* Header */}
-      <div className="px-4 py-3 flex items-center bg-[#1E3480]">
+      <div className="px-5 py-3.5 flex items-center justify-between bg-[#1E3480]">
         <div className="flex items-center gap-2">
           <span className="text-white font-bold text-lg tracking-widest leading-none">{lawyer.id}</span>
           <span className="text-white/50 text-xs">律師</span>
         </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${lawyer.overdue.expired > 0 ? 'bg-red-500 text-white' : 'bg-white/10 text-white/30'}`}>
+            結案已逾期 {lawyer.overdue.expired}
+          </span>
+          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${lawyer.overdue.warning > 0 ? 'bg-[#E8A020] text-white' : 'bg-white/10 text-white/30'}`}>
+            結案即將逾期 {lawyer.overdue.warning}
+          </span>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3.5 p-4">
+      <div className="flex flex-col gap-0 p-4">
 
-        {/* 進行中案件 + 本月結案 */}
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col items-center gap-0.5">
-            <SectionLabel>進行中</SectionLabel>
-            <MiniDonut cases={lawyer.activeCases} max={MAX_CASES} />
+        {/* ① 工作量 */}
+        <div className="flex items-center gap-4 pb-4">
+          <MiniDonut cases={lawyer.activeCases} max={MAX_CASES} />
+          <div className="flex flex-col gap-0.5">
+            <p className="text-xs text-gray-400">進行中案件</p>
+            <p className="text-sm font-bold text-[#1E3480]">{lawyer.activeCases} 件</p>
+            <p className="text-xs text-gray-400 mt-1">平均結案週期</p>
+            <p className="text-sm font-bold text-[#1E3480]">{lawyer.avgCycleDays} 天</p>
           </div>
-          <div className="h-10 w-px bg-gray-100" />
-          <div className="flex flex-col items-center gap-0.5">
-            <SectionLabel>本月結案</SectionLabel>
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-xl font-bold text-[#1E3480]">{lawyer.closedThisMonth}</span>
-              <span className="text-xs text-gray-400">件</span>
+        </div>
+
+        <div className="h-px bg-gray-100 mb-4" />
+
+        {/* ② 本月結案進度 */}
+        <div className="pb-4">
+          <div className="flex items-center justify-between mb-2">
+            <SectionLabel>本月結案進度</SectionLabel>
+            <span className={`text-xs font-bold ${attainment >= 100 ? 'text-emerald-500' : attainment >= 70 ? 'text-[#1E3480]' : 'text-orange-500'}`}>
+              {attainment}%
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
+            <div
+              className={`h-full rounded-full transition-all ${attainment >= 100 ? 'bg-emerald-400' : attainment >= 70 ? 'bg-[#1E3480]' : 'bg-orange-400'}`}
+              style={{ width: `${Math.min(attainment, 100)}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-xs text-gray-400">本月預計</span>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-lg font-bold text-gray-400">{lawyer.plannedCloseThisMonth}</span>
+                <span className="text-xs text-gray-300">件</span>
+              </div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-200">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-xs text-gray-400">本月實際</span>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-lg font-bold text-[#1E3480]">{lawyer.closedThisMonth}</span>
+                <span className="text-xs text-gray-400">件</span>
+              </div>
             </div>
           </div>
-          <div className="h-10 w-px bg-gray-100" />
-          <div className="flex flex-col items-center gap-0.5">
-            <SectionLabel>平均週期</SectionLabel>
+        </div>
+
+        <div className="h-px bg-gray-100 mb-4" />
+
+        {/* ③ 計費時數 */}
+        <div className="pb-4">
+          <p className="text-xs text-gray-400 mb-0.5">本月計費時數</p>
+          <div className="flex items-baseline gap-2">
             <div className="flex items-baseline gap-0.5">
-              <span className="text-xl font-bold text-[#1E3480]">{lawyer.avgCycleDays}</span>
-              <span className="text-xs text-gray-400">天</span>
+              <span className="text-lg font-bold text-[#1E3480]">{lawyer.billingHours}</span>
+              <span className="text-xs text-gray-400">hr</span>
             </div>
+            {lawyer.billingHours !== lawyer.billingHoursLastMonth && (
+              <div className={`flex items-center gap-0.5 text-xs font-semibold ${lawyer.billingHours > lawyer.billingHoursLastMonth ? 'text-emerald-500' : 'text-red-400'}`}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  {lawyer.billingHours > lawyer.billingHoursLastMonth
+                    ? <polyline points="18 15 12 9 6 15" />
+                    : <polyline points="6 9 12 15 18 9" />}
+                </svg>
+                {Math.abs(lawyer.billingHours - lawyer.billingHoursLastMonth)}hr
+              </div>
+            )}
           </div>
+          <p className="text-xs text-gray-300 mt-0.5">上月 {lawyer.billingHoursLastMonth}hr</p>
         </div>
 
-        <div className="h-px bg-gray-50" />
+        <div className="h-px bg-gray-100 mb-4" />
 
-        {/* 計費時數 */}
-        <div className="flex items-center justify-between">
-          <SectionLabel>本月計費時數</SectionLabel>
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-[#1E3480]">{lawyer.billingHours}</span>
-            <span className="text-xs text-gray-400">hr</span>
-          </div>
-        </div>
-
-        <div className="h-px bg-gray-50" />
-
-        {/* 結案逾期 */}
-        <div>
-          <SectionLabel>結案逾期狀況</SectionLabel>
-          <OverdueBadges overdue={lawyer.overdue} />
-        </div>
-
-        <div className="h-px bg-gray-50" />
-
-        {/* 案件分布 */}
+        {/* ④ 案件分布 */}
         <div>
           <SectionLabel>案件分布</SectionLabel>
           <CaseTypeBars caseTypes={lawyer.caseTypes} />

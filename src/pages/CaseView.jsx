@@ -45,25 +45,56 @@ function CaseTypeBadge({ type }) {
   )
 }
 
-function CaseCard({ c }) {
-  const closeStatus = getCloseStatus(c.expectedCloseDate, c.status)
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col gap-3 cursor-pointer">
+const SUB_TYPE_LABEL = {
+  appeal:      { text: '上訴', color: 'bg-violet-50 text-violet-600 border border-violet-100' },
+  enforcement: { text: '強制執行', color: 'bg-amber-50 text-amber-600 border border-amber-100' },
+}
 
-      {/* Type + close status */}
+function CaseCard({ c, allCases }) {
+  const closeStatus = getCloseStatus(c.expectedCloseDate, c.status)
+  const isSubCase = !!c.parentCaseId
+  const subTypeInfo = isSubCase ? SUB_TYPE_LABEL[c.subType] : null
+  const activeSubCount = c.subCases?.filter(id => {
+    const sub = allCases.find(x => x.id === id)
+    return sub && sub.status !== 'closed'
+  }).length ?? 0
+
+  return (
+    <div className={`bg-white rounded-xl border shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col gap-3 cursor-pointer ${isSubCase ? 'border-l-4 border-l-violet-300 border-gray-100' : 'border-gray-100'}`}>
+
+      {/* Type + close status — 永遠置頂 */}
       <div className="flex items-start justify-between gap-2">
         <CaseTypeBadge type={c.type} />
-        {closeStatus && (
-          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md whitespace-nowrap ${closeStatus.class}`}>
-            {closeStatus.label}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {activeSubCount > 0 && (
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
+              子案 {activeSubCount}
+            </span>
+          )}
+          {closeStatus && (
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md whitespace-nowrap ${closeStatus.class}`}>
+              {closeStatus.label}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Title + ID */}
-      <div className="flex flex-col gap-1.5">
-        <p className="text-sm font-semibold text-gray-800 leading-snug">{c.title}</p>
-        <p className="text-xs text-gray-400">{c.id}</p>
+      {/* 子案標籤 — 案件類型下方 */}
+      {isSubCase && (
+        <div className="flex items-center gap-1.5">
+          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${subTypeInfo?.color}`}>
+            {subTypeInfo?.text}{c.instanceLevel ? ` · ${c.instanceLevel}` : ''}
+          </span>
+          <span className="text-xs text-gray-400">父案 {c.parentCaseId}</span>
+        </div>
+      )}
+
+      {/* 訴訟三要素 + ID */}
+      <div className="flex flex-col gap-1">
+        <p className="text-xs text-gray-600">{c.parties}</p>
+        <p className="text-sm font-semibold text-[#1E3480] leading-snug">{c.cause}</p>
+        <p className="text-xs text-gray-600">{c.relief}</p>
+        <p className="text-xs text-gray-300 mt-0.5">{c.id}</p>
       </div>
 
       {/* Expected close date (if set and not closed) */}
@@ -111,7 +142,7 @@ function KanbanColumn({ status, cases }) {
         {cases.length === 0 && (
           <div className="flex items-center justify-center h-20 text-xs text-gray-300">無案件</div>
         )}
-        {cases.map((c) => <CaseCard key={c.id} c={c} />)}
+        {cases.map((c) => <CaseCard key={c.id} c={c} allCases={MOCK_CASES} />)}
       </div>
     </div>
   )

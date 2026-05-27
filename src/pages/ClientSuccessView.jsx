@@ -1,11 +1,23 @@
 import { useState } from 'react'
-import { MOCK_CLIENT_HEALTH, CASE_STATUSES } from '../constants/mockData'
+import { MOCK_CLIENT_HEALTH, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
 
 const TODAY = new Date()
 TODAY.setHours(0, 0, 0, 0)
 
 function daysSince(dateStr) {
   return Math.floor((TODAY - new Date(dateStr)) / 86400000)
+}
+
+function daysUntil(dateStr) {
+  return Math.floor((new Date(dateStr) - TODAY) / 86400000)
+}
+
+function followUpUrgency(days) {
+  if (days < 0)  return { color: 'text-red-500',    label: `已逾期 ${Math.abs(days)} 天` }
+  if (days === 0) return { color: 'text-red-500',    label: '今天到期' }
+  if (days <= 3)  return { color: 'text-red-500',    label: `${days} 天後` }
+  if (days <= 7)  return { color: 'text-orange-500', label: `${days} 天後` }
+  return           { color: 'text-gray-400',         label: `${days} 天後` }
 }
 
 function contactUrgencyColor(days) {
@@ -47,23 +59,38 @@ function ContactLog({ contacts }) {
 function FollowUpList({ followUps }) {
   return (
     <div className="flex flex-col gap-3">
-      {followUps.map((f) => (
-        <div key={f.id} className="flex items-start gap-3">
-          <div className={`w-4 h-4 rounded border mt-0.5 shrink-0 flex items-center justify-center ${
-            f.done ? 'bg-[#1E3480] border-[#1E3480]' : 'border-gray-300'
-          }`}>
-            {f.done && (
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                <polyline points="2 6 5 9 10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
+      {followUps.map((f) => {
+        const urgency = !f.done ? followUpUrgency(daysUntil(f.date)) : null
+        return (
+          <div key={f.id} className="flex items-start gap-3">
+            <div className={`w-4 h-4 rounded border mt-0.5 shrink-0 flex items-center justify-center ${
+              f.done ? 'bg-[#1E3480] border-[#1E3480]' : 'border-gray-300'
+            }`}>
+              {f.done && (
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                  <polyline points="2 6 5 9 10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                {f.category && DEADLINE_CATEGORIES[f.category] && (
+                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${DEADLINE_CATEGORIES[f.category].color}`}>
+                    {DEADLINE_CATEGORIES[f.category].label}
+                  </span>
+                )}
+                <p className={`text-sm ${f.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{f.task}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">{f.date}</span>
+                {urgency && (
+                  <span className={`text-xs font-semibold ${urgency.color}`}>{urgency.label}</span>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-            <p className={`text-sm ${f.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{f.task}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{f.date}</p>
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -91,9 +118,11 @@ function ClientListItem({ client, selected, onClick }) {
         <span className={`text-xs font-bold ${selected ? 'text-white' : 'text-[#1E3480]'}`}>{client.lawyer}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate">{client.client}</p>
+        <p className="text-sm font-semibold text-[#1E3480] truncate">{client.parties}</p>
+        <p className="text-xs text-gray-600 truncate">{client.cause}</p>
+        <p className="text-xs text-gray-600 truncate">{client.relief}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-xs text-gray-400">{client.caseType}</span>
+          <p className="text-xs text-gray-300 truncate">{client.caseNo}</p>
           <StatusBadge statusKey={client.status} />
         </div>
       </div>
@@ -102,17 +131,29 @@ function ClientListItem({ client, selected, onClick }) {
   )
 }
 
-function DetailPanel({ client }) {
+function DetailPanel({ client, onBack }) {
   const days = daysSince(client.lastContactDate)
   return (
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Client header */}
-      <div className="px-8 py-6 border-b border-gray-100">
+      <div className="px-4 md:px-8 py-5 md:py-6 border-b border-gray-100">
+        {/* Mobile back button */}
+        <button
+          onClick={onBack}
+          className="md:hidden flex items-center gap-1.5 text-xs font-semibold text-[#1E3480] mb-4"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          返回列表
+        </button>
         <div className="flex items-center gap-2.5 mb-0.5">
-          <h2 className="text-xl font-bold text-[#1E3480]">{client.client}</h2>
+          <h2 className="text-xl font-bold text-[#1E3480]">{client.parties}</h2>
           <StatusBadge statusKey={client.status} />
         </div>
-        <p className="text-sm text-gray-400">{client.caseNo} · {client.caseType} · {client.lawyer} 律師</p>
+        <p className="text-xs text-gray-600 mt-0.5">{client.cause}</p>
+        <p className="text-xs text-gray-600">{client.relief}</p>
+        <p className="text-xs text-gray-300 mt-1">{client.caseNo} · {client.lawyer} 律師</p>
 
         <div className="flex items-center gap-6 mt-5">
           <div>
@@ -127,7 +168,7 @@ function DetailPanel({ client }) {
         </div>
       </div>
 
-      <div className="px-8 py-6 flex flex-col gap-8">
+      <div className="px-4 md:px-8 py-6 flex flex-col gap-8">
         {/* Contact log */}
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -187,15 +228,15 @@ export default function ClientSuccessView() {
   const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) =>
     daysSince(b.lastContactDate) - daysSince(a.lastContactDate)
   )
-  const [selected, setSelected] = useState(sorted[0])
+  const [selected, setSelected] = useState(null)
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col md:flex-row h-full">
 
-      {/* Left list */}
-      <div className="w-72 shrink-0 bg-white border-r border-gray-100 flex flex-col">
+      {/* Left list — full width on mobile when no item selected, hidden when item selected */}
+      <div className={`md:w-[360px] md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
         <div className="px-5 py-5 border-b border-gray-100">
-          <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Client Success</p>
+          <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
           <h1 className="text-lg font-bold text-[#1E3480]">客戶健康追蹤</h1>
           <p className="text-xs text-gray-400 mt-0.5">{sorted.length} 位追蹤中客戶</p>
         </div>
@@ -211,10 +252,10 @@ export default function ClientSuccessView() {
         </div>
       </div>
 
-      {/* Right detail */}
-      <div className="flex-1 overflow-hidden bg-white">
+      {/* Right detail — full width on mobile when item selected, hidden when no item selected */}
+      <div className={`flex-1 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
-          ? <DetailPanel client={selected} />
+          ? <DetailPanel client={selected} onBack={() => setSelected(null)} />
           : <div className="flex items-center justify-center h-full text-sm text-gray-300">請選擇客戶</div>
         }
       </div>

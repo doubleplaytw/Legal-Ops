@@ -1,11 +1,23 @@
 import { useState } from 'react'
-import { MOCK_CLIENT_HEALTH, CASE_STATUSES } from '../../constants/mockData'
+import { MOCK_CLIENT_HEALTH, CASE_STATUSES, DEADLINE_CATEGORIES } from '../../constants/mockData'
 
 const TODAY = new Date()
 TODAY.setHours(0, 0, 0, 0)
 
 function daysSince(dateStr) {
   return Math.floor((TODAY - new Date(dateStr)) / 86400000)
+}
+
+function daysUntil(dateStr) {
+  return Math.floor((new Date(dateStr) - TODAY) / 86400000)
+}
+
+function followUpUrgency(days) {
+  if (days < 0)   return { color: 'text-red-500',    label: `已逾期 ${Math.abs(days)} 天` }
+  if (days === 0)  return { color: 'text-red-500',    label: '今天到期' }
+  if (days <= 3)   return { color: 'text-red-500',    label: `${days} 天後` }
+  if (days <= 7)   return { color: 'text-orange-500', label: `${days} 天後` }
+  return            { color: 'text-gray-400',         label: `${days} 天後` }
 }
 
 function contactUrgencyColor(days) {
@@ -40,9 +52,10 @@ function ClientRow({ client, onClick }) {
         <span className="text-xs font-bold text-[#1E3480]">{client.lawyer}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-gray-800 truncate">{client.client}</p>
+        <p className="text-sm font-semibold text-[#1E3480] truncate">{client.parties}</p>
+        <p className="text-xs text-gray-600 truncate">{client.cause}</p>
+        <p className="text-xs text-gray-600 truncate">{client.relief}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-xs text-gray-400">{client.caseType}</span>
           <StatusBadge statusKey={client.status} />
         </div>
       </div>
@@ -79,23 +92,38 @@ function ContactLog({ contacts }) {
 function FollowUpList({ followUps }) {
   return (
     <div className="flex flex-col gap-2.5">
-      {followUps.map((f) => (
-        <div key={f.id} className="flex items-start gap-2.5">
-          <div className={`w-4 h-4 rounded border mt-0.5 shrink-0 flex items-center justify-center ${
-            f.done ? 'bg-[#1E3480] border-[#1E3480]' : 'border-gray-300'
-          }`}>
-            {f.done && (
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                <polyline points="2 6 5 9 10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
+      {followUps.map((f) => {
+        const urgency = !f.done ? followUpUrgency(daysUntil(f.date)) : null
+        return (
+          <div key={f.id} className="flex items-start gap-2.5">
+            <div className={`w-4 h-4 rounded border mt-0.5 shrink-0 flex items-center justify-center ${
+              f.done ? 'bg-[#1E3480] border-[#1E3480]' : 'border-gray-300'
+            }`}>
+              {f.done && (
+                <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                  <polyline points="2 6 5 9 10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                {f.category && DEADLINE_CATEGORIES[f.category] && (
+                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${DEADLINE_CATEGORIES[f.category].color}`}>
+                    {DEADLINE_CATEGORIES[f.category].label}
+                  </span>
+                )}
+                <p className={`text-xs ${f.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{f.task}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">{f.date}</span>
+                {urgency && (
+                  <span className={`text-xs font-semibold ${urgency.color}`}>{urgency.label}</span>
+                )}
+              </div>
+            </div>
           </div>
-          <div>
-            <p className={`text-xs ${f.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{f.task}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{f.date}</p>
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -115,7 +143,9 @@ function ClientDetail({ client, onBack }) {
         </button>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-gray-800 truncate">{client.client}</p>
-          <p className="text-xs text-gray-400">{client.caseNo} · {client.caseType}</p>
+          <p className="text-xs font-semibold text-[#1E3480] truncate">{client.parties}</p>
+          <p className="text-xs text-gray-600 truncate">{client.cause}</p>
+          <p className="text-xs text-gray-600 truncate">{client.relief}</p>
         </div>
       </div>
 
