@@ -2,6 +2,7 @@ import { useState } from 'react'
 import CasePieChart from '../components/modules/CasePieChart'
 import DateRangePicker from '../components/ui/DateRangePicker'
 import KpiCard from '../components/ui/KpiCard'
+import { useDemoMode } from '../hooks/useDemoMode'
 import {
   MOCK_ACTIVE_CASES,
   MOCK_RETAINED_CASES,
@@ -107,6 +108,7 @@ export default function Dashboard() {
   const today = new Date().toISOString().slice(0, 10)
   const firstOfYear = `${new Date().getFullYear()}-01-01`
 
+  const isDemoMode = useDemoMode()
   const [retainedRange, setRetainedRange] = useState({ from: firstOfYear, to: today })
   const [consultRange, setConsultRange] = useState({ from: firstOfYear, to: today })
 
@@ -181,50 +183,54 @@ export default function Dashboard() {
         </div>
 
         {/* Upcoming Deadlines */}
-        <ChartCard title="下一個事件時間點">
-          <div className="overflow-y-auto max-h-[400px] flex flex-col divide-y divide-gray-50 pr-1">
-            {allEvents.map((item) => {
-                const cat = DEADLINE_CATEGORIES[item.category]
-                return (
-                  <div key={item.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${cat.color}`}>
-                          {cat.label}
-                        </span>
-                        <span className="text-sm font-semibold text-[#1E3480]">
-                          {item.taskTitle || item.cause}
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-0.5 pl-0.5">
-                        <span className="text-xs text-gray-600">{item.parties}</span>
-                        {item.taskTitle && (
-                          <span className="text-xs font-semibold text-[#1E3480]">{item.cause}</span>
-                        )}
-                        <span className="text-xs text-gray-600">{item.relief}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-gray-300">{item.caseNo}</span>
-                          <span className="text-xs text-gray-200">·</span>
-                          <span className="text-xs text-gray-300">{item.lawyer}</span>
+        {!isDemoMode && (
+          <ChartCard title="下一個事件時間點">
+            <div className="overflow-y-auto max-h-[400px] flex flex-col divide-y divide-gray-50 pr-1">
+              {allEvents.map((item) => {
+                  const cat = DEADLINE_CATEGORIES[item.category]
+                  return (
+                    <div key={item.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${cat.color}`}>
+                            {cat.label}
+                          </span>
+                          <span className="text-sm font-semibold text-[#1E3480]">
+                            {item.taskTitle || item.cause}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-0.5 pl-0.5">
+                          <span className="text-xs text-gray-600">{item.parties}</span>
+                          {item.taskTitle && (
+                            <span className="text-xs font-semibold text-[#1E3480]">{item.cause}</span>
+                          )}
+                          <span className="text-xs text-gray-600">{item.relief}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-gray-300">{item.caseNo}</span>
+                            <span className="text-xs text-gray-200">·</span>
+                            <span className="text-xs text-gray-300">{item.lawyer}</span>
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center gap-3 shrink-0 ml-4">
+                        <span className="text-xs text-gray-400">{item.date}</span>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${daysLeftColor(item.daysLeft)}`}>
+                          {item.daysLeft} 天後
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0 ml-4">
-                      <span className="text-xs text-gray-400">{item.date}</span>
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${daysLeftColor(item.daysLeft)}`}>
-                        {item.daysLeft} 天後
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-          </div>
-        </ChartCard>
+                  )
+                })}
+            </div>
+          </ChartCard>
+        )}
 
         {/* Pipeline Distribution */}
-        <ChartCard title="案件流程分布">
-          <PipelineChart />
-        </ChartCard>
+        {!isDemoMode && (
+          <ChartCard title="案件流程分布">
+            <PipelineChart />
+          </ChartCard>
+        )}
 
         {/* Pie Charts */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

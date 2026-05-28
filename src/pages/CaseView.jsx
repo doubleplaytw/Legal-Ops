@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import HScrollArea from '../components/ui/HScrollArea'
 import { MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
+import { useDemoMode } from '../hooks/useDemoMode'
 
 const TODAY = new Date()
 TODAY.setHours(0, 0, 0, 0)
@@ -121,14 +122,15 @@ function CaseCard({ c, allCases }) {
   )
 }
 
-function KanbanColumn({ status, cases }) {
+function KanbanColumn({ status, cases, stageIndex, isDemoMode }) {
   const overdueCount = cases.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
+  const displayLabel = isDemoMode ? `階段 ${stageIndex}` : status.label
   return (
     <div className="flex flex-col gap-3 min-w-[280px] w-[280px]">
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: status.color }} />
-          <span className="text-sm font-bold text-gray-700">{status.label}</span>
+          <span className="text-sm font-bold text-gray-700">{displayLabel}</span>
           {overdueCount > 0 && (
             <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-full">逾期 {overdueCount}</span>
           )}
@@ -149,6 +151,7 @@ function KanbanColumn({ status, cases }) {
 }
 
 export default function CaseView() {
+  const isDemoMode = useDemoMode()
   const [filterLawyer, setFilterLawyer] = useState('all')
   const [filterType, setFilterType] = useState('all')
   const [filterOverdue, setFilterOverdue] = useState(false)
@@ -217,8 +220,8 @@ export default function CaseView() {
 
       <HScrollArea>
         <div className="flex gap-5 h-full" style={{ width: 'max-content' }}>
-          {CASE_STATUSES.map((status) => (
-            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} />
+          {CASE_STATUSES.map((status, idx) => (
+            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} stageIndex={idx + 1} isDemoMode={isDemoMode} />
           ))}
         </div>
       </HScrollArea>
