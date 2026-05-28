@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { MOCK_CLIENT_HEALTH, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
+import { useDemoMode } from '../hooks/useDemoMode'
 
 const TODAY = new Date()
 TODAY.setHours(0, 0, 0, 0)
@@ -131,7 +132,7 @@ function ClientListItem({ client, selected, onClick }) {
   )
 }
 
-function DetailPanel({ client, onBack }) {
+function DetailPanel({ client, onBack, isDemoMode }) {
   const days = daysSince(client.lastContactDate)
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -168,63 +169,66 @@ function DetailPanel({ client, onBack }) {
         </div>
       </div>
 
-      <div className="px-4 md:px-8 py-6 flex flex-col gap-8">
-        {/* Contact log */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <SectionLabel>接觸紀錄</SectionLabel>
-            <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
-              ＋ 新增紀錄
-            </button>
-          </div>
-          <ContactLog contacts={client.contacts} />
-        </div>
-
-        <div className="h-px bg-gray-100" />
-
-        {/* Drive links */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <SectionLabel>相關文件</SectionLabel>
-            <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
-              ＋ 新增連結
-            </button>
-          </div>
-          {client.driveLinks.length === 0 ? (
-            <p className="text-xs text-gray-300">尚未連結文件</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {client.driveLinks.map((doc) => (
-                <a key={doc.id} href={doc.url} target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2.5 text-sm text-[#1E3480] hover:underline">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-400">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
-                  </svg>
-                  {doc.name}
-                </a>
-              ))}
+      {!isDemoMode && (
+        <div className="px-4 md:px-8 py-6 flex flex-col gap-8">
+          {/* Contact log */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <SectionLabel>接觸紀錄</SectionLabel>
+              <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
+                ＋ 新增紀錄
+              </button>
             </div>
-          )}
-        </div>
-
-        <div className="h-px bg-gray-100" />
-
-        {/* Follow ups */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <SectionLabel>後續追蹤</SectionLabel>
-            <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
-              ＋ 新增追蹤
-            </button>
+            <ContactLog contacts={client.contacts} />
           </div>
-          <FollowUpList followUps={client.followUps} />
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Drive links */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <SectionLabel>相關文件</SectionLabel>
+              <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
+                ＋ 新增連結
+              </button>
+            </div>
+            {client.driveLinks.length === 0 ? (
+              <p className="text-xs text-gray-300">尚未連結文件</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {client.driveLinks.map((doc) => (
+                  <a key={doc.id} href={doc.url} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2.5 text-sm text-[#1E3480] hover:underline">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-gray-400">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    {doc.name}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Follow ups */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <SectionLabel>後續追蹤</SectionLabel>
+              <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
+                ＋ 新增追蹤
+              </button>
+            </div>
+            <FollowUpList followUps={client.followUps} />
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
 
 export default function ClientSuccessView() {
+  const isDemoMode = useDemoMode()
   const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) =>
     daysSince(b.lastContactDate) - daysSince(a.lastContactDate)
   )
@@ -255,7 +259,7 @@ export default function ClientSuccessView() {
       {/* Right detail — full width on mobile when item selected, hidden when no item selected */}
       <div className={`flex-1 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
-          ? <DetailPanel client={selected} onBack={() => setSelected(null)} />
+          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} />
           : <div className="flex items-center justify-center h-full text-sm text-gray-300">請選擇客戶</div>
         }
       </div>
