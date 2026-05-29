@@ -71,7 +71,7 @@ function App() {
   const [activePage, setActivePage] = useState('dashboard')
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F4F6FB]">
+    <div className="h-screen flex flex-col bg-[#F4F6FB] overflow-hidden">
 
       {/* Header */}
       <header className="bg-[#1E3480] px-4 md:px-8 py-4 flex items-center justify-between shadow-md shrink-0">
