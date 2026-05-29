@@ -168,12 +168,10 @@ export default function Dashboard() {
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">案件概況</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard label="本月預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} />
             <KpiCard label="本月實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} />
             <KpiCard label="委任轉換率" value={MOCK_KPI.conversionRate} unit="%" sub="較上月底" trend={calcTrend(MOCK_KPI.conversionRate, MOCK_KPI.conversionRateLastMonth, '%')} />
-            <KpiCard label="七天內到期事件" value={MOCK_KPI.upcomingDeadlines} unit="件" />
-            <KpiCard label="結案已逾期" value={overdueCount} unit="件" accent />
           </div>
         </div>
 
@@ -186,6 +184,18 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <KpiCard label="尚未請款案件" value={MOCK_KPI.uninvoiced} unit="件" sub="較上月" trend={MOCK_KPI.uninvoicedTrend} amount={MOCK_KPI.uninvoicedAmount} />
             <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="較上月" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} />
+          </div>
+        </div>
+
+        {/* Section: 時效概況 */}
+        <div>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">時效概況</span>
+            <div className="flex-1 h-px bg-gray-100" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <KpiCard label="七天內到期事件" value={MOCK_KPI.upcomingDeadlines} unit="件" />
+            <KpiCard label="結案已逾期" value={overdueCount} unit="件" accent />
           </div>
         </div>
 
@@ -222,7 +232,7 @@ export default function Dashboard() {
                       <div className="flex items-center gap-3 shrink-0 ml-4">
                         <span className="text-xs text-gray-400">{item.date}</span>
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${daysLeftColor(item.daysLeft)}`}>
-                          {item.daysLeft} 天後
+                          {item.daysLeft < 0 ? `${Math.abs(item.daysLeft)} 天前` : `${item.daysLeft} 天後`}
                         </span>
                       </div>
                     </div>
