@@ -16,7 +16,7 @@ export default function KpiCard({ label, value, unit, sub, accent, trend, amount
       <div className="flex items-center justify-between mt-0.5">
         {sub && <p className="text-xs text-gray-400">{sub}</p>}
         {trend && (
-          <div className={`flex items-center gap-0.5 text-xs font-semibold ml-auto ${trend.positive ? 'text-emerald-500' : 'text-red-400'}`}>
+          <div className={`flex items-center gap-0.5 text-xs font-semibold ml-auto ${trend.up ? 'text-emerald-500' : 'text-red-400'}`}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               {trend.up
                 ? <polyline points="18 15 12 9 6 15" />

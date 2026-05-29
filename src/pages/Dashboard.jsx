@@ -174,12 +174,12 @@ export default function Dashboard() {
         {/* Section: 案件概況 */}
         <div>
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">案件概況</span>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">本月案件概況</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <KpiCard label="本月預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} />
-            <KpiCard label="本月實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} />
+            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} />
+            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <KpiCard label="諮詢案件數量" value={consultTotal} unit="件" />
@@ -208,7 +208,7 @@ export default function Dashboard() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <KpiCard label="七天內到期事件" value={MOCK_KPI.upcomingDeadlines} unit="件" />
-            <KpiCard label="事件已逾期" value={overdueCount} unit="件" accent />
+            <KpiCard label="事件已逾期" value={overdueCount} unit="件" />
           </div>
         </div>
 
