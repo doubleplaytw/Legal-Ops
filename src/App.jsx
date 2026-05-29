@@ -103,7 +103,7 @@ function App() {
             <button
               key={item.key}
               onClick={() => setActivePage(item.key)}
-              className={`flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
+              className={`relative flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
                 isActive ? 'text-[#1E3480]' : 'text-gray-400'
               }`}
             >

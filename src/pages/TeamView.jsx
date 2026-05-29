@@ -252,7 +252,7 @@ export default function TeamView() {
       </div>
 
       {/* Lawyer columns */}
-      <HScrollArea style={{ '--card-width': 'calc((100vw - 224px - 64px) / 4.5)' }}>
+      <HScrollArea style={{ '--card-width': 'clamp(260px, calc((100vw - 288px) / 2.8), 320px)' }}>
         <div className="flex gap-4 h-full" style={{ width: 'max-content' }}>
           {displayed.map((lawyer) => (
             <LawyerCard key={lawyer.id} lawyer={lawyer} />
