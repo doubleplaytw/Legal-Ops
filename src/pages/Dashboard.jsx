@@ -53,12 +53,12 @@ function ChartCard({ title, badge, children }) {
 }
 
 const PIPELINE_STAGES = [
-  { key: 'appointment', label: '預約諮詢', color: '#94A3B8' },
-  { key: 'meeting',     label: '進行會晤', color: '#8B5CF6' },
-  { key: 'quote',       label: '報價',     color: '#0D9488' },
-  { key: 'signing',     label: '簽約',     color: '#F97316' },
-  { key: 'active',      label: '進行中',   color: '#1E3480' },
-  { key: 'closed',      label: '結案',     color: '#22C55E' },
+  { key: 'appointment', label: '階段 1', color: '#94A3B8' },
+  { key: 'meeting',     label: '階段 2', color: '#8B5CF6' },
+  { key: 'quote',       label: '階段 3', color: '#0D9488' },
+  { key: 'signing',     label: '階段 4', color: '#F97316' },
+  { key: 'active',      label: '階段 5', color: '#1E3480' },
+  { key: 'closed',      label: '階段 6', color: '#22C55E' },
 ]
 
 function PipelineChart() {
