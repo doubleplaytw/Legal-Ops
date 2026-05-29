@@ -317,6 +317,17 @@ export const MOCK_UPCOMING_DEADLINES = [
   { id: 5, caseNo: 'C-2026-015', parties: '林○○',               cause: '勞資爭議',       relief: '仲裁請求',             caseType: '勞資糾紛', category: 'INVOICE',   date: '2026-06-02', daysLeft: 7, lawyer: 'B 律師' },
 ]
 
+export const MOCK_CYCLE_DAYS_BY_TYPE = [
+  { type: '民事訴訟', avgDays: 124 },
+  { type: '刑事訴訟', avgDays: 210 },
+  { type: '家事案件', avgDays: 82  },
+  { type: '財富傳承', avgDays: 48  },
+  { type: '行政訴訟', avgDays: 195 },
+  { type: '勞資糾紛', avgDays: 96  },
+  { type: '智慧財產', avgDays: 156 },
+  { type: '商事相關', avgDays: 72  },
+]
+
 export const STATUTE_TYPES = ['消滅時效', '取得時效', '追訴時效', '除斥期間', '合約期間']
 
 export const MOCK_STATUTES = [

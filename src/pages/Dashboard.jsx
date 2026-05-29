@@ -3,6 +3,7 @@ import CasePieChart from '../components/modules/CasePieChart'
 import DateRangePicker from '../components/ui/DateRangePicker'
 import KpiCard from '../components/ui/KpiCard'
 import { useDemoMode } from '../hooks/useDemoMode'
+import { CASE_TYPE_COLORS } from '../constants/caseTypes'
 import {
   MOCK_ACTIVE_CASES,
   MOCK_RETAINED_CASES,
@@ -12,6 +13,7 @@ import {
   DEADLINE_CATEGORIES,
   MOCK_CASES,
   MOCK_CLIENT_HEALTH,
+  MOCK_CYCLE_DAYS_BY_TYPE,
 } from '../constants/mockData'
 
 function filterByDateRange(data, from, to) {
@@ -96,6 +98,35 @@ function calcTrend(current, last, unit, lowerIsBetter = false) {
   const positive = lowerIsBetter ? !up : up
   const label = `${diff > 0 ? '+' : ''}${diff}${unit}`
   return { label, up, positive }
+}
+
+function CycleDaysChart() {
+  const max = Math.max(...MOCK_CYCLE_DAYS_BY_TYPE.map((d) => d.avgDays))
+  const overall = Math.round(
+    MOCK_CYCLE_DAYS_BY_TYPE.reduce((s, d) => s + d.avgDays, 0) / MOCK_CYCLE_DAYS_BY_TYPE.length
+  )
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-gray-400">全所平均</span>
+        <span className="text-sm font-bold text-[#1E3480]">{overall} 天</span>
+      </div>
+      {MOCK_CYCLE_DAYS_BY_TYPE.map((d, i) => (
+        <div key={d.type} className="flex items-center gap-3">
+          <span className="text-xs text-gray-400 w-16 shrink-0 text-right leading-tight">{d.type}</span>
+          <div className="flex-1 h-4 bg-gray-50 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all duration-500"
+              style={{ width: `${(d.avgDays / max) * 100}%`, backgroundColor: CASE_TYPE_COLORS[i] + 'CC' }}
+            />
+          </div>
+          <span className="text-xs font-semibold text-gray-600 w-12 shrink-0 text-right">
+            {d.avgDays} 天
+          </span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function daysLeftColor(days) {
@@ -211,6 +242,11 @@ export default function Dashboard() {
             <KpiCard label="事件已逾期" value={overdueCount} unit="件" />
           </div>
         </div>
+
+        {/* Section: 各類型結案週期 */}
+        <ChartCard title="各案件類型平均結案週期">
+          <CycleDaysChart />
+        </ChartCard>
 
         {/* Upcoming Deadlines */}
         {!isDemoMode && (
