@@ -148,15 +148,15 @@ function DetailPanel({ client, onBack, isDemoMode }) {
           </svg>
           返回列表
         </button>
-        <div className="flex items-center gap-2.5 mb-0.5">
-          <h2 className="text-xl font-bold text-[#1E3480]">{client.parties}</h2>
+        <div className="flex items-center gap-2.5 mb-0.5 min-w-0">
+          <h2 className="text-xl font-bold text-[#1E3480] truncate">{client.parties}</h2>
           <StatusBadge statusKey={client.status} />
         </div>
         <p className="text-xs text-gray-600 mt-0.5">{client.cause}</p>
         <p className="text-xs text-gray-600">{client.relief}</p>
         <p className="text-xs text-gray-300 mt-1">{client.caseNo} · {client.lawyer} 律師</p>
 
-        <div className="flex items-center gap-6 mt-5">
+        <div className="flex flex-wrap items-center gap-4 mt-5">
           <div>
             <p className="text-xs text-gray-400 mb-1">最後接觸</p>
             <span className={`text-sm font-semibold ${contactUrgencyColor(days)}`}>{days} 天前（{client.lastContactDate}）</span>
@@ -238,7 +238,7 @@ export default function ClientSuccessView() {
     <div className="flex flex-col md:flex-row h-full">
 
       {/* Left list — full width on mobile when no item selected, hidden when item selected */}
-      <div className={`md:w-[360px] md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
+      <div className={`md:w-[260px] lg:w-[360px] md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
         <div className="px-5 py-5 border-b border-gray-100">
           <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
           <h1 className="text-lg font-bold text-[#1E3480]">客戶健康追蹤</h1>
@@ -257,7 +257,7 @@ export default function ClientSuccessView() {
       </div>
 
       {/* Right detail — full width on mobile when item selected, hidden when no item selected */}
-      <div className={`flex-1 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
+      <div className={`flex-1 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
           ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} />
           : <div className="flex items-center justify-center h-full text-sm text-gray-300">請選擇客戶</div>
