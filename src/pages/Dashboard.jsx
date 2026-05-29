@@ -243,11 +243,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Section: 各類型結案週期 */}
-        <ChartCard title="各案件類型平均結案週期">
-          <CycleDaysChart />
-        </ChartCard>
-
         {/* Upcoming Deadlines */}
         {!isDemoMode && (
           <ChartCard title="下一個事件時間點">
@@ -297,6 +292,11 @@ export default function Dashboard() {
             <PipelineChart />
           </ChartCard>
         )}
+
+        {/* Cycle Time by Case Type */}
+        <ChartCard title="各案件類型平均結案週期">
+          <CycleDaysChart />
+        </ChartCard>
 
         {/* Pie Charts */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
