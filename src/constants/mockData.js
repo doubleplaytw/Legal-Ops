@@ -318,6 +318,14 @@ export const MOCK_UPCOMING_DEADLINES = [
   { id: 5, caseNo: 'C-2026-015', parties: '林○○',               cause: '勞資爭議',       relief: '仲裁請求',             caseType: '勞資糾紛', category: 'INVOICE',   date: '2026-06-02', daysLeft: 7, lawyer: 'B 律師' },
 ]
 
+export const MOCK_CONVERSION_FUNNEL = [
+  { stage: '初次諮詢', count: 38, color: '#94A3B8' },
+  { stage: '進行會晤', count: 28, color: '#8B5CF6' },
+  { stage: '提出報價', count: 22, color: '#0D9488' },
+  { stage: '完成簽約', count: 18, color: '#F97316' },
+  { stage: '確定委任', count: 15, color: '#1E3480' },
+]
+
 export const MOCK_CYCLE_DAYS_BY_TYPE = [
   { type: '民事訴訟', avgDays: 124 },
   { type: '刑事訴訟', avgDays: 210 },

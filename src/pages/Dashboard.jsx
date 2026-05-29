@@ -14,6 +14,7 @@ import {
   MOCK_CASES,
   MOCK_CLIENT_HEALTH,
   MOCK_CYCLE_DAYS_BY_TYPE,
+  MOCK_CONVERSION_FUNNEL,
 } from '../constants/mockData'
 
 function filterByDateRange(data, from, to) {
@@ -98,6 +99,38 @@ function calcTrend(current, last, unit, lowerIsBetter = false) {
   const positive = lowerIsBetter ? !up : up
   const label = `${diff > 0 ? '+' : ''}${diff}${unit}`
   return { label, up, positive }
+}
+
+function ConversionFunnelChart() {
+  const max = MOCK_CONVERSION_FUNNEL[0].count
+  return (
+    <div className="flex flex-col gap-2.5">
+      {MOCK_CONVERSION_FUNNEL.map((s, i) => {
+        const prev = i > 0 ? MOCK_CONVERSION_FUNNEL[i - 1].count : null
+        const rate = prev ? Math.round((s.count / prev) * 100) : null
+        return (
+          <div key={s.stage}>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400 w-16 shrink-0 text-right leading-tight">{s.stage}</span>
+              <div className="flex-1 h-5 bg-gray-50 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${(s.count / max) * 100}%`, backgroundColor: s.color + 'CC' }}
+                />
+              </div>
+              <span className="text-xs font-semibold text-gray-600 w-8 shrink-0 text-right">{s.count} 件</span>
+            </div>
+            {rate && (
+              <div className="flex items-center gap-3 my-0.5">
+                <span className="w-16 shrink-0" />
+                <span className="text-xs text-gray-300 pl-1">↓ {rate}% 進入下一階段</span>
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 function CycleDaysChart() {
@@ -287,12 +320,15 @@ export default function Dashboard() {
           </ChartCard>
         )}
 
-        {/* Pipeline Distribution */}
-        {!isDemoMode && (
+        {/* Pipeline Distribution + Conversion Funnel */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ChartCard title="案件流程分布">
             <PipelineChart />
           </ChartCard>
-        )}
+          <ChartCard title="客戶轉換漏斗">
+            <ConversionFunnelChart />
+          </ChartCard>
+        </div>
 
         {/* Cycle Time by Case Type */}
         <ChartCard title="各案件類型平均結案週期">
