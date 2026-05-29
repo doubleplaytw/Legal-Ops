@@ -148,8 +148,14 @@ export default function Dashboard() {
         lawyer: client.lawyer,
       }))
   )
-  const allEvents = [...MOCK_UPCOMING_DEADLINES, ...followUpEvents]
-    .sort((a, b) => a.date.localeCompare(b.date))
+  const allEvents = [
+    ...MOCK_UPCOMING_DEADLINES.map((e) => ({
+      ...e,
+      daysLeft: Math.floor((new Date(e.date) - todayDate) / 86400000),
+    })),
+    ...followUpEvents,
+  ]
+    .sort((a, b) => a.daysLeft - b.daysLeft)
     .slice(0, 10)
 
   return (
