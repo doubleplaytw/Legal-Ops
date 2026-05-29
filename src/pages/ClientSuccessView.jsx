@@ -278,10 +278,8 @@ export default function ClientSuccessView() {
   })
 
   return (
-    <div className="flex flex-col md:flex-row h-full">
-
-      {/* Left list — full width on mobile when no item selected, hidden when item selected */}
-      <div className={`md:w-[260px] lg:w-[360px] md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
+    <div className="flex flex-col h-full">
+      <div className="bg-white flex flex-col h-full">
         <div className="px-5 py-5 border-b border-gray-100">
           <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
           <h1 className="text-lg font-bold text-[#1E3480]">客戶健康追蹤</h1>
@@ -310,21 +308,12 @@ export default function ClientSuccessView() {
             <ClientListItem
               key={c.id}
               client={c}
-              selected={selected?.id === c.id}
-              onClick={() => setSelected(c)}
+              selected={false}
+              onClick={() => {}}
             />
           ))}
         </div>
       </div>
-
-      {/* Right detail — full width on mobile when item selected, hidden when no item selected */}
-      <div className={`flex-1 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
-        {selected
-          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} />
-          : null
-        }
-      </div>
-
     </div>
   )
 }

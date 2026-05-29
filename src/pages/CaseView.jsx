@@ -122,9 +122,9 @@ function CaseCard({ c, allCases }) {
   )
 }
 
-function KanbanColumn({ status, cases, stageIndex, isDemoMode }) {
+function KanbanColumn({ status, cases, stageIndex }) {
   const overdueCount = cases.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
-  const displayLabel = isDemoMode ? `階段 ${stageIndex}` : status.label
+  const displayLabel = `階段 ${stageIndex}`
   return (
     <div className="flex flex-col gap-3 min-w-[280px] w-[280px]">
       <div className="flex items-center justify-between px-1">
@@ -221,7 +221,7 @@ export default function CaseView() {
       <HScrollArea>
         <div className="flex gap-5 h-full" style={{ width: 'max-content' }}>
           {CASE_STATUSES.map((status, idx) => (
-            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} stageIndex={idx + 1} isDemoMode={isDemoMode} />
+            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} stageIndex={idx + 1} />
           ))}
         </div>
       </HScrollArea>
