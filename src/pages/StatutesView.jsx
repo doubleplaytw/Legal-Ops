@@ -29,7 +29,7 @@ function StatuteRow({ s }) {
       </td>
       <td className="px-4 py-3.5 align-top">
         <p className="text-sm font-semibold text-gray-800">{s.name}</p>
-        <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{s.note}</p>
+        <p className="hidden lg:block text-xs text-gray-400 mt-0.5 leading-relaxed">{s.note}</p>
       </td>
       <td className="px-4 py-3.5 align-top text-center whitespace-nowrap">
         <span className="text-sm font-bold text-[#1E3480]">{s.display}</span>
