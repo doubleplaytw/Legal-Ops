@@ -111,7 +111,7 @@ function ConversionFunnelChart() {
         const pct = (s.count / max) * 100
         return (
           <div key={s.stage} className="flex items-center gap-3">
-            <span className="text-xs text-gray-400 w-16 shrink-0 text-right leading-tight">{s.stage}</span>
+            <span className="text-xs text-gray-400 w-16 shrink-0 text-right leading-tight">{`階段 ${i + 1}`}</span>
             <div className="flex-1 h-6 bg-gray-50 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2.5"
