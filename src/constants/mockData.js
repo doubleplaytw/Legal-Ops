@@ -53,6 +53,7 @@ export const MOCK_KPI = {
   plannedCloseThisMonth: 11,
   closedThisMonth: 9,
   conversionRate: 68,
+  consultationHours: 48,
   // 上月底結算（比較基準）
   plannedCloseLastMonth: 9,
   closedLastMonth: 7,

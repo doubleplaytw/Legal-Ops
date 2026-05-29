@@ -212,9 +212,10 @@ export default function Dashboard() {
             <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} />
             <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <KpiCard label="諮詢案件數量" value={consultTotal} unit="件" />
-            <KpiCard label="委任案件數量" value={retainedTotal} unit="件" />
+            <KpiCard label="諮詢時數" value={MOCK_KPI.consultationHours} unit="hr" />
+            <KpiCard label="諮詢轉委任案件數量" value={retainedTotal} unit="件" />
             <KpiCard label="委任轉換率" value={MOCK_KPI.conversionRate} unit="%" sub="較上月底" trend={calcTrend(MOCK_KPI.conversionRate, MOCK_KPI.conversionRateLastMonth, '%')} />
           </div>
         </div>
