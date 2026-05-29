@@ -106,26 +106,23 @@ function ConversionFunnelChart() {
   return (
     <div className="flex flex-col gap-2.5">
       {MOCK_CONVERSION_FUNNEL.map((s, i) => {
-        const prev = i > 0 ? MOCK_CONVERSION_FUNNEL[i - 1].count : null
-        const rate = prev ? Math.round((s.count / prev) * 100) : null
+        const next = MOCK_CONVERSION_FUNNEL[i + 1]
+        const rate = next ? Math.round((next.count / s.count) * 100) : null
+        const pct = (s.count / max) * 100
         return (
-          <div key={s.stage}>
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-400 w-16 shrink-0 text-right leading-tight">{s.stage}</span>
-              <div className="flex-1 h-5 bg-gray-50 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(s.count / max) * 100}%`, backgroundColor: s.color + 'CC' }}
-                />
+          <div key={s.stage} className="flex items-center gap-3">
+            <span className="text-xs text-gray-400 w-16 shrink-0 text-right leading-tight">{s.stage}</span>
+            <div className="flex-1 h-6 bg-gray-50 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-2.5"
+                style={{ width: `${pct}%`, backgroundColor: s.color + 'CC' }}
+              >
+                {rate && (
+                  <span className="text-xs font-semibold text-white whitespace-nowrap">→ {rate}%</span>
+                )}
               </div>
-              <span className="text-xs font-semibold text-gray-600 w-8 shrink-0 text-right">{s.count} 件</span>
             </div>
-            {rate && (
-              <div className="flex items-center gap-3 my-0.5">
-                <span className="w-16 shrink-0" />
-                <span className="text-xs text-gray-300 pl-1">↓ {rate}% 進入下一階段</span>
-              </div>
-            )}
+            <span className="text-xs font-semibold text-gray-600 w-8 shrink-0 text-right">{s.count} 件</span>
           </div>
         )
       })}
