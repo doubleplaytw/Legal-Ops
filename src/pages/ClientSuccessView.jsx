@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MOCK_CLIENT_HEALTH, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
+import { MOCK_CLIENT_HEALTH, MOCK_CASES, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
 import { useDemoMode } from '../hooks/useDemoMode'
 
 const TODAY = new Date()
@@ -26,6 +26,35 @@ function contactUrgencyColor(days) {
   if (days > 7)  return 'text-orange-500'
   return 'text-emerald-600'
 }
+
+const URGENCY_CONFIG = {
+  critical: { label: '緊急', color: 'bg-red-50 text-red-600 border border-red-100' },
+  warning:  { label: '待處理', color: 'bg-amber-50 text-amber-600 border border-amber-100' },
+  normal:   null,
+}
+
+function getUrgency(client) {
+  const now = new Date()
+  const hasOverdueFollowUp = client.followUps.some(
+    (f) => !f.done && new Date(f.date) < now
+  )
+  const linkedCase = MOCK_CASES.find((c) => c.id === client.caseNo)
+  const caseOverdue = linkedCase?.expectedCloseDate &&
+    linkedCase.status !== 'closed' &&
+    new Date(linkedCase.expectedCloseDate) < now
+
+  if (hasOverdueFollowUp || caseOverdue) return 'critical'
+
+  const daysSinceContact = daysSince(client.lastContactDate)
+  const hasUrgentFollowUp = client.followUps.some(
+    (f) => !f.done && daysUntil(f.date) <= 3 && daysUntil(f.date) >= 0
+  )
+  if (daysSinceContact > 14 || hasUrgentFollowUp) return 'warning'
+
+  return 'normal'
+}
+
+const URGENCY_SCORE = { critical: 0, warning: 1, normal: 2 }
 
 
 function SectionLabel({ children }) {
@@ -108,6 +137,8 @@ function StatusBadge({ statusKey }) {
 
 function ClientListItem({ client, selected, onClick }) {
   const days = daysSince(client.lastContactDate)
+  const urgency = getUrgency(client)
+  const urgencyConfig = URGENCY_CONFIG[urgency]
   return (
     <button
       onClick={onClick}
@@ -119,9 +150,15 @@ function ClientListItem({ client, selected, onClick }) {
         <span className={`text-xs font-bold ${selected ? 'text-white' : 'text-[#1E3480]'}`}>{client.lawyer}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-[#1E3480] truncate">{client.parties}</p>
+        <div className="flex items-center gap-1.5 mb-0.5">
+          {urgencyConfig && (
+            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded shrink-0 ${urgencyConfig.color}`}>
+              {urgencyConfig.label}
+            </span>
+          )}
+          <p className="text-sm font-semibold text-[#1E3480] truncate">{client.parties}</p>
+        </div>
         <p className="text-xs text-gray-600 truncate">{client.cause}</p>
-        <p className="text-xs text-gray-600 truncate">{client.relief}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
           <p className="text-xs text-gray-300 truncate">{client.caseNo}</p>
           <StatusBadge statusKey={client.status} />
@@ -229,10 +266,16 @@ function DetailPanel({ client, onBack, isDemoMode }) {
 
 export default function ClientSuccessView() {
   const isDemoMode = useDemoMode()
-  const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) =>
-    daysSince(b.lastContactDate) - daysSince(a.lastContactDate)
-  )
+  const [sortKey, setSortKey] = useState('urgency')
   const [selected, setSelected] = useState(null)
+
+  const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) => {
+    if (sortKey === 'urgency') {
+      const diff = URGENCY_SCORE[getUrgency(a)] - URGENCY_SCORE[getUrgency(b)]
+      if (diff !== 0) return diff
+    }
+    return daysSince(b.lastContactDate) - daysSince(a.lastContactDate)
+  })
 
   return (
     <div className="flex flex-col md:flex-row h-full">
@@ -242,7 +285,25 @@ export default function ClientSuccessView() {
         <div className="px-5 py-5 border-b border-gray-100">
           <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
           <h1 className="text-lg font-bold text-[#1E3480]">客戶健康追蹤</h1>
-          <p className="text-xs text-gray-400 mt-0.5">{sorted.length} 位追蹤中客戶</p>
+          <p className="text-xs text-gray-400 mt-0.5 mb-3">{sorted.length} 位追蹤中客戶</p>
+          <div className="flex gap-1">
+            {[
+              { key: 'urgency', label: '急迫性' },
+              { key: 'contact', label: '最後接觸' },
+            ].map((o) => (
+              <button
+                key={o.key}
+                onClick={() => setSortKey(o.key)}
+                className={`text-xs px-3 py-1 rounded-lg border transition-all ${
+                  sortKey === o.key
+                    ? 'bg-[#1E3480] border-[#1E3480] text-white font-semibold'
+                    : 'border-gray-200 text-gray-500 hover:border-[#1E3480] hover:text-[#1E3480]'
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
         </div>
         <div className="overflow-y-auto flex-1">
           {sorted.map((c) => (
