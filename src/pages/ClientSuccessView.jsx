@@ -260,7 +260,7 @@ export default function ClientSuccessView() {
       <div className={`flex-1 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
           ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} />
-          : <div className="flex items-center justify-center h-full text-sm text-gray-300">請選擇客戶</div>
+          : null
         }
       </div>
 
