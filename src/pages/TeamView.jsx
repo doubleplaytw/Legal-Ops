@@ -50,22 +50,47 @@ function MiniDonut({ cases, max }) {
 }
 
 function CaseTypeBars({ caseTypes }) {
-  const countMap = Object.fromEntries(caseTypes.map((c) => [c.type, c.count]))
-  const allTypes = CASE_TYPES.map((type, i) => ({ type, count: countMap[type] ?? 0, colorIndex: i }))
-  const total = allTypes.reduce((s, c) => s + c.count, 0)
+  const active = caseTypes.filter((c) => c.count > 0)
+  const total = active.reduce((s, c) => s + c.count, 0)
+  const maxDays = Math.max(...active.map((c) => c.avgDays ?? 0), 1)
   return (
-    <div className="flex flex-col gap-2">
-      {allTypes.map((c) => (
-        <div key={c.type} className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-500">{c.type}</span>
-            <span className="text-sm font-semibold text-gray-700">{c.count}</span>
+    <div className="flex flex-col gap-3">
+      {active.map((c) => {
+        const colorIndex = CASE_TYPES.indexOf(c.type)
+        const color = CASE_TYPE_COLORS[colorIndex >= 0 ? colorIndex : 0]
+        return (
+          <div key={c.type} className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">{c.type}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">{c.count} 件</span>
+                {c.avgDays && (
+                  <>
+                    <span className="text-gray-200">·</span>
+                    <span className="text-xs font-semibold text-[#1E3480]">{c.avgDays} 天</span>
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-1 h-2">
+              <div className="flex-1 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: total > 0 ? `${(c.count / total) * 100}%` : '0%', backgroundColor: color + '99' }} />
+              </div>
+              {c.avgDays && (
+                <div className="flex-1 bg-gray-50 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${(c.avgDays / maxDays) * 100}%`, backgroundColor: color + 'CC' }} />
+                </div>
+              )}
+            </div>
           </div>
-          <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all" style={{ width: total > 0 ? `${(c.count / total) * 100}%` : '0%', backgroundColor: CASE_TYPE_COLORS[c.colorIndex] }} />
-          </div>
+        )
+      })}
+      {active.length > 0 && (
+        <div className="flex gap-1 mt-0.5">
+          <span className="flex-1 text-center text-xs text-gray-300">件數分布</span>
+          <span className="flex-1 text-center text-xs text-gray-300">結案週期</span>
         </div>
-      ))}
+      )}
     </div>
   )
 }
@@ -120,8 +145,6 @@ function LawyerCard({ lawyer }) {
           <div className="flex flex-col gap-0.5">
             <p className="text-xs text-gray-400">進行中案件</p>
             <p className="text-sm font-bold text-[#1E3480]">{lawyer.activeCases} 件</p>
-            <p className="text-xs text-gray-400 mt-1">平均結案週期</p>
-            <p className="text-sm font-bold text-[#1E3480]">{lawyer.avgCycleDays} 天</p>
           </div>
         </div>
 
