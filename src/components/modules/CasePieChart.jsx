@@ -28,38 +28,40 @@ function CustomLegend({ payload }) {
   )
 }
 
-export default function CasePieChart({ data }) {
+export default function CasePieChart({ data, chartHeight = 180 }) {
   const total = data.reduce((sum, d) => sum + d.count, 0)
+  const outerRadius = Math.min(80, Math.floor((chartHeight - 10) / 2))
+  const innerRadius = Math.round(outerRadius * 0.625)
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="flex items-baseline gap-1">
-        <span className="text-4xl font-bold text-[#1E3480]">{total}</span>
-        <span className="text-sm text-gray-400">件</span>
+      <div className="relative w-full" style={{ height: chartHeight }}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="count"
+              nameKey="type"
+              cx="50%"
+              cy="50%"
+              innerRadius={innerRadius}
+              outerRadius={outerRadius}
+              paddingAngle={3}
+              strokeWidth={0}
+            >
+              {data.map((_, i) => (
+                <Cell key={i} fill={CASE_TYPE_COLORS[i % CASE_TYPE_COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-2xl font-bold text-[#1E3480] leading-none">{total}</span>
+          <span className="text-xs text-gray-400 mt-0.5">件</span>
+        </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={180}>
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="count"
-            nameKey="type"
-            cx="50%"
-            cy="50%"
-            innerRadius={50}
-            outerRadius={80}
-            paddingAngle={3}
-            strokeWidth={0}
-          >
-            {data.map((_, i) => (
-              <Cell key={i} fill={CASE_TYPE_COLORS[i % CASE_TYPE_COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip content={<CustomTooltip />} />
-        </PieChart>
-      </ResponsiveContainer>
-
-      {/* Legend 獨立在圖表下方，不讓 Recharts 佔用圖表空間 */}
       <ul className="flex flex-wrap justify-center gap-x-3 gap-y-1.5">
         {data.map((entry, i) => (
           <li key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
