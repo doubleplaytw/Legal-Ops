@@ -189,6 +189,12 @@ export default function Dashboard() {
     return new Date(c.expectedCloseDate) < todayDate
   }).length
 
+  const warningCount = MOCK_CASES.filter((c) => {
+    if (c.status === 'closed' || !c.expectedCloseDate) return false
+    const diffDays = Math.ceil((new Date(c.expectedCloseDate) - todayDate) / 86400000)
+    return diffDays >= 0 && diffDays <= 30
+  }).length
+
   const consultTotal = MOCK_CONSULTATION_CASES.reduce((s, d) => s + d.count, 0)
   const retainedTotal = MOCK_RETAINED_CASES.reduce((s, d) => s + d.count, 0)
 
@@ -209,15 +215,25 @@ export default function Dashboard() {
         lawyer: client.lawyer,
       }))
   )
-  const allEvents = [
+  const allEventsRaw = [
     ...MOCK_UPCOMING_DEADLINES.map((e) => ({
       ...e,
       daysLeft: Math.floor((new Date(e.date) - todayDate) / 86400000),
     })),
     ...followUpEvents,
-  ]
+  ].sort((a, b) => a.daysLeft - b.daysLeft)
+
+  const eventOverdueCount  = allEventsRaw.filter(e => e.daysLeft < 0).length
+  const eventWarningCount  = allEventsRaw.filter(e => e.daysLeft >= 0 && e.daysLeft <= 7).length
+  const allEvents = allEventsRaw.slice(0, 10)
+
+  const closingCases = MOCK_CASES
+    .filter(c => c.status !== 'closed' && c.expectedCloseDate)
+    .map(c => ({
+      ...c,
+      daysLeft: Math.ceil((new Date(c.expectedCloseDate) - todayDate) / 86400000),
+    }))
     .sort((a, b) => a.daysLeft - b.daysLeft)
-    .slice(0, 10)
 
   return (
     <div className="px-4 py-6 md:px-8 md:py-8">
@@ -263,14 +279,70 @@ export default function Dashboard() {
         </div>
 
         {/* Section: 時效概況 */}
-        <div>
-          <div className="flex items-center gap-3 mb-4">
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">時效概況</span>
             <div className="flex-1 h-px bg-gray-100" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <KpiCard label="七天內到期事件" value={MOCK_KPI.upcomingDeadlines} unit="件" />
-            <KpiCard label="事件已逾期" value={overdueCount} unit="件" />
+
+          {/* 結案逾期卡片 + 明細 */}
+          <div className="grid grid-cols-2 gap-4">
+            <KpiCard label="結案已逾期" value={overdueCount} unit="件" />
+            <KpiCard label="結案即將逾期" value={warningCount} unit="件" />
+          </div>
+
+          <ChartCard title="結案期限明細">
+            <div className="overflow-y-auto max-h-[320px] flex flex-col divide-y divide-gray-50 pr-1">
+              {closingCases.length === 0 && (
+                <p className="text-xs text-gray-300 py-4 text-center">目前無待結案件</p>
+              )}
+              {closingCases.map((c) => {
+                const isOverdue = c.daysLeft < 0
+                const isWarning = !isOverdue && c.daysLeft <= 30
+                const chipClass = isOverdue
+                  ? 'bg-red-50 text-red-500'
+                  : isWarning
+                  ? 'bg-orange-50 text-orange-500'
+                  : 'bg-gray-50 text-gray-400'
+                const chipLabel = isOverdue
+                  ? `${Math.abs(c.daysLeft)} 天前`
+                  : `${c.daysLeft} 天後`
+                const typeIdx = CASE_TYPE_COLORS[['民事訴訟','刑事訴訟','家事案件','財富傳承','行政訴訟','勞資糾紛','智慧財產','商事相關'].indexOf(c.type)] || CASE_TYPE_COLORS[0]
+                return (
+                  <div key={c.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-md" style={{ backgroundColor: typeIdx + '20', color: typeIdx }}>
+                          {c.type}
+                        </span>
+                        <span className="text-sm font-semibold text-[#1E3480]">{c.cause}</span>
+                      </div>
+                      <div className="flex flex-col gap-0.5 pl-0.5">
+                        <span className="text-xs text-gray-600">{c.parties}</span>
+                        <span className="text-xs text-gray-600">{c.relief}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-300">{c.id}</span>
+                          <span className="text-xs text-gray-200">·</span>
+                          <span className="text-xs text-gray-300">{c.lawyer} 律師</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0 ml-4">
+                      <span className="text-xs text-gray-400">{c.expectedCloseDate}</span>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${chipClass}`}>
+                        {chipLabel}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </ChartCard>
+
+          {/* 事件逾期卡片 */}
+          <div className="grid grid-cols-2 gap-4">
+            <KpiCard label="事件已逾期" value={eventOverdueCount} unit="件" />
+            <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" />
           </div>
         </div>
 

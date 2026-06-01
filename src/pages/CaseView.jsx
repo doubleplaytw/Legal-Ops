@@ -11,9 +11,9 @@ function getCloseStatus(expectedCloseDate, caseStatus) {
   if (caseStatus === 'closed' || !expectedCloseDate) return null
   const close = new Date(expectedCloseDate)
   const diffDays = Math.ceil((close - TODAY) / 86400000)
-  if (diffDays < 0)   return { label: '已逾期',   class: 'bg-red-50 text-red-500 border border-red-100',           dot: 'bg-red-400'     }
-  if (diffDays <= 30) return { label: '即將逾期', class: 'bg-orange-50 text-orange-500 border border-orange-100',   dot: 'bg-orange-400'  }
-  return                     { label: '未逾期',   class: 'bg-emerald-50 text-emerald-600 border border-emerald-100', dot: 'bg-emerald-400' }
+  if (diffDays < 0)   return { label: '結案已逾期',   class: 'bg-red-50 text-red-500 border border-red-100',           dot: 'bg-red-400'     }
+  if (diffDays <= 30) return { label: '結案即將逾期', class: 'bg-orange-50 text-orange-500 border border-orange-100',   dot: 'bg-orange-400'  }
+  return                     { label: '未逾期',       class: 'bg-emerald-50 text-emerald-600 border border-emerald-100', dot: 'bg-emerald-400' }
 }
 
 function daysUntil(dateStr) {
