@@ -346,6 +346,46 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Upcoming Deadlines */}
+        <ChartCard title="下一個事件時間點">
+            <div className="overflow-y-auto max-h-[400px] flex flex-col divide-y divide-gray-50 pr-1">
+              {allEvents.map((item) => {
+                  const cat = DEADLINE_CATEGORIES[item.category]
+                  return (
+                    <div key={item.id} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${cat.color}`}>
+                            {cat.label}
+                          </span>
+                          <span className="text-sm font-semibold text-[#1E3480]">
+                            {item.taskTitle || item.cause}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-0.5 pl-0.5">
+                          <span className="text-xs text-gray-600">{item.parties}</span>
+                          {item.taskTitle && (
+                            <span className="text-xs font-semibold text-[#1E3480]">{item.cause}</span>
+                          )}
+                          <span className="text-xs text-gray-600">{item.relief}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs text-gray-300">{item.caseNo}</span>
+                            <span className="text-xs text-gray-200">·</span>
+                            <span className="text-xs text-gray-300">{item.lawyer}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 ml-4">
+                        <span className="text-xs text-gray-400">{item.date}</span>
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${daysLeftColor(item.daysLeft)}`}>
+                          {item.daysLeft < 0 ? `${Math.abs(item.daysLeft)} 天前` : `${item.daysLeft} 天後`}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+          </ChartCard>
 
         {/* Pipeline Distribution + Conversion Funnel */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
