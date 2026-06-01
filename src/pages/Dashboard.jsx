@@ -347,8 +347,7 @@ export default function Dashboard() {
         </div>
 
         {/* Upcoming Deadlines */}
-        {!isDemoMode && (
-          <ChartCard title="下一個事件時間點">
+        <ChartCard title="下一個事件時間點">
             <div className="overflow-y-auto max-h-[400px] flex flex-col divide-y divide-gray-50 pr-1">
               {allEvents.map((item) => {
                   const cat = DEADLINE_CATEGORIES[item.category]
@@ -387,7 +386,6 @@ export default function Dashboard() {
                 })}
             </div>
           </ChartCard>
-        )}
 
         {/* Pipeline Distribution + Conversion Funnel */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
