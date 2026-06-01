@@ -195,8 +195,9 @@ export default function Dashboard() {
     return diffDays >= 0 && diffDays <= 30
   }).length
 
-  const consultTotal = MOCK_CONSULTATION_CASES.reduce((s, d) => s + d.count, 0)
-  const retainedTotal = MOCK_RETAINED_CASES.reduce((s, d) => s + d.count, 0)
+  const activeTotal   = MOCK_ACTIVE_CASES.reduce((s, d) => s + d.count, 0)
+  const consultTotal  = consultData.reduce((s, d) => s + d.count, 0)
+  const retainedTotal = retainedData.reduce((s, d) => s + d.count, 0)
 
   const followUpEvents = MOCK_CLIENT_HEALTH.flatMap((client) =>
     client.followUps
@@ -249,21 +250,37 @@ export default function Dashboard() {
         </div>
 
         {/* Section: 案件概況 */}
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">本月案件概況</span>
-            <div className="flex-1 h-px bg-gray-100" />
+        <div className="grid grid-cols-2 gap-6">
+
+          {/* Row 1 左：進行中案件 */}
+          <ChartCard title="進行中案件" badge="即時">
+            <CasePieChart data={MOCK_ACTIVE_CASES} chartHeight={130} />
+          </ChartCard>
+
+          {/* Row 1 右：預計結案 + 實際結案 */}
+          <div className="flex flex-col gap-4">
+            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="上月比較" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} className="flex-1" />
+            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="上月比較" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} className="flex-1" />
           </div>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} />
-            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth} unit="件" sub="較上月底" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} />
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <KpiCard label="諮詢案件數量" value={consultTotal} unit="件" />
-            <KpiCard label="諮詢時數" value={MOCK_KPI.consultationHours} unit="hr" />
-            <KpiCard label="諮詢轉委任案件數量" value={retainedTotal} unit="件" />
-            <KpiCard label="委任轉換率" value={MOCK_KPI.conversionRate} unit="%" sub="較上月底" trend={calcTrend(MOCK_KPI.conversionRate, MOCK_KPI.conversionRateLastMonth, '%')} />
-          </div>
+
+          {/* Row 2 左：確定委任案件 */}
+          <ChartCard title="確定委任案件">
+            <DateRangePicker from={retainedRange.from} to={retainedRange.to} onChange={setRetainedRange} />
+            <CasePieChart data={retainedData.length ? retainedData : noData} />
+          </ChartCard>
+
+          {/* Row 2 右：諮詢案件 */}
+          <ChartCard title="諮詢案件">
+            <DateRangePicker from={consultRange.from} to={consultRange.to} onChange={setConsultRange} />
+            <CasePieChart data={consultData.length ? consultData : noData} />
+          </ChartCard>
+
+          {/* Row 3 左：委任轉換率 */}
+          <KpiCard label="委任轉換率" value={MOCK_KPI.conversionRate} unit="%" sub="上月比較" trend={calcTrend(MOCK_KPI.conversionRate, MOCK_KPI.conversionRateLastMonth, '%')} />
+
+          {/* Row 3 右：諮詢時數 */}
+          <KpiCard label="諮詢時數" value={MOCK_KPI.consultationHours} unit="hr" />
+
         </div>
 
         {/* Section: 帳務概況 */}
@@ -273,8 +290,8 @@ export default function Dashboard() {
             <div className="flex-1 h-px bg-gray-100" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <KpiCard label="尚未請款案件" value={MOCK_KPI.uninvoiced} unit="件" sub="較上月" trend={MOCK_KPI.uninvoicedTrend} amount={MOCK_KPI.uninvoicedAmount} />
-            <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="較上月" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} />
+            <KpiCard label="尚未請款案件" value={MOCK_KPI.uninvoiced} unit="件" sub="上月比較" trend={MOCK_KPI.uninvoicedTrend} amount={MOCK_KPI.uninvoicedAmount} />
+            <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="上月比較" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} />
           </div>
         </div>
 
@@ -402,31 +419,6 @@ export default function Dashboard() {
           <CycleDaysChart />
         </ChartCard>
 
-        {/* Pie Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ChartCard title="進行中案件" badge="即時">
-            <div className="h-[36px]" />
-            <CasePieChart data={MOCK_ACTIVE_CASES} />
-          </ChartCard>
-
-          <ChartCard title="確定委任案件">
-            <DateRangePicker
-              from={retainedRange.from}
-              to={retainedRange.to}
-              onChange={setRetainedRange}
-            />
-            <CasePieChart data={retainedData.length ? retainedData : noData} />
-          </ChartCard>
-
-          <ChartCard title="諮詢案件">
-            <DateRangePicker
-              from={consultRange.from}
-              to={consultRange.to}
-              onChange={setConsultRange}
-            />
-            <CasePieChart data={consultData.length ? consultData : noData} />
-          </ChartCard>
-        </div>
 
       </div>
     </div>
