@@ -5,6 +5,10 @@
  *
  * 【律師設定】手動維護，由所長更新
  *   A 律師ID  B 姓名  C 案件上限  D 本月預計結案  E 計費時數(本月)  F 計費時數(上月)
+ *   D 季度預計結案數  E 本季累計結案數  F 上季結算結案數
+ *   G 本季累計計費時數(hr)  H 季度計費目標(hr)  I 上季計費時數(hr)
+ *   J 本季收款目標(NTD)  K 本季已收金額(NTD)  L 上季已收金額(NTD)
+ *   所有達成率均由前端計算，不存入 Sheets
  *
  * 【案件】主資料，每案一列
  *   A 案件編號  B 建立日期  C 當事人  D 案由  E 聲明事項  F 案件類型
@@ -49,16 +53,22 @@ async function fetchRange(range) {
  * 回傳格式：{ [lawyerId]: { name, caseCapacity, plannedCloseThisMonth, billingHours, billingHoursLastMonth } }
  */
 export async function fetchLawyerSettings() {
-  const rows = await fetchRange('律師設定!A2:F')
+  const rows = await fetchRange('律師設定!A2:H')
   return Object.fromEntries(
-    rows.map(([id, name, capacity, planned, billing, billingLast]) => [
+    rows.map(([id, name, capacity, plannedCloseQ, closedQ, closedLastQ, billingQ, billingQTarget, billingLastQ, receivable, received, receivedLastQ]) => [
       id,
       {
         name: name ?? '',
         caseCapacity: Number(capacity) || 10,
-        plannedCloseThisMonth: Number(planned) || 0,
-        billingHours: Number(billing) || 0,
-        billingHoursLastMonth: Number(billingLast) || 0,
+        plannedCloseQ: Number(plannedCloseQ) || 0,
+        closedQ: Number(closedQ) || 0,
+        closedLastQ: Number(closedLastQ) || 0,
+        billingHoursQ: Number(billingQ) || 0,
+        billingHoursQTarget: Number(billingQTarget) || 0,
+        billingHoursLastQ: Number(billingLastQ) || 0,
+        receivableAmount: Number(receivable) || 0,
+        receivedAmount: Number(received) || 0,
+        receivedAmountLastQ: Number(receivedLastQ) || 0,
       },
     ])
   )
