@@ -8,11 +8,13 @@ const SORT_OPTIONS = [
   { value: 'id',       label: '字母 A → L' },
   { value: 'active',   label: '進行中案件（多→少）' },
   { value: 'deadline', label: '到期件數（多→少）' },
-  { value: 'billing',  label: '計費時數（多→少）' },
-  { value: 'closed',   label: '本月實際結案（多→少）' },
-  { value: 'newcases', label: '本月新收案件（多→少）' },
-  { value: 'cycle',    label: '平均週期（長→短）' },
-  { value: 'overdue',  label: '已逾期件數（多→少）' },
+  { value: 'billing',  label: '本季計費時數（多→少）' },
+  { value: 'closed',   label: '本季結案（多→少）' },
+  { value: 'newcases',    label: '本月新收案件（多→少）' },
+  { value: 'cycle',       label: '平均週期（長→短）' },
+  { value: 'receivable',  label: '本季收款目標（多→少）' },
+  { value: 'collection',  label: '本季收款率（低→高）' },  // collectionRate 由前端計算
+  { value: 'overdue',     label: '已逾期件數（多→少）' },
 ]
 
 function sortLawyers(lawyers, key) {
@@ -20,11 +22,17 @@ function sortLawyers(lawyers, key) {
     if (key === 'id')       return a.id.localeCompare(b.id)
     if (key === 'active')   return b.activeCases - a.activeCases
     if (key === 'deadline') return b.upcomingDeadlines - a.upcomingDeadlines
-    if (key === 'billing')  return b.billingHours - a.billingHours
-    if (key === 'closed')   return b.closedThisMonth - a.closedThisMonth
-    if (key === 'newcases') return b.newCasesThisMonth - a.newCasesThisMonth
-    if (key === 'cycle')    return b.avgCycleDays - a.avgCycleDays
-    if (key === 'overdue')  return b.overdue.expired - a.overdue.expired
+    if (key === 'billing')  return b.billingHoursQ - a.billingHoursQ
+    if (key === 'closed')   return b.closedQ - a.closedQ
+    if (key === 'newcases')   return b.newCasesThisMonth - a.newCasesThisMonth
+    if (key === 'cycle')      return b.avgCycleDays - a.avgCycleDays
+    if (key === 'receivable') return b.receivableAmount - a.receivableAmount
+    if (key === 'collection') {
+      const rateA = a.receivableAmount > 0 ? a.receivedAmount / a.receivableAmount : 0
+      const rateB = b.receivableAmount > 0 ? b.receivedAmount / b.receivableAmount : 0
+      return rateA - rateB
+    }
+    if (key === 'overdue')    return b.overdue.expired - a.overdue.expired
     return 0
   })
 }
@@ -99,18 +107,52 @@ function SectionLabel({ children }) {
   return <p className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">{children}</p>
 }
 
-function LawyerCard({ lawyer }) {
-  const attainment = lawyer.plannedCloseThisMonth > 0
-    ? Math.round((lawyer.closedThisMonth / lawyer.plannedCloseThisMonth) * 100)
-    : 0
+function QuarterKpiBlock({ sectionLabel, targetDisplay, currentDisplay, lastQValue, currentValue, diffUnit, rate }) {
+  const diff = currentValue - lastQValue
+  const rateColor = rate >= 70 ? 'text-[#1E3480]' : 'text-red-500'
+  const diffPositive = diff >= 0
+  return (
+    <div className="pb-4">
+      <SectionLabel>{sectionLabel}</SectionLabel>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+        <div>
+          <p className="text-xs text-gray-400 mb-0.5">當季目標</p>
+          <p className="text-sm font-bold text-gray-400">{targetDisplay}</p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-400 mb-0.5">達成率</p>
+          <div className="flex items-baseline gap-0.5">
+            <span className={`text-xl font-bold ${rateColor}`}>{rate}</span>
+            <span className="text-xs text-gray-400">%</span>
+          </div>
+        </div>
+        <div>
+          <p className="text-xs text-gray-400 mb-0.5">本季目前</p>
+          <p className="text-sm font-bold text-[#1E3480]">{currentDisplay}</p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-400 mb-0.5">較上季</p>
+          <p className="text-sm font-bold text-gray-600">
+            {diffUnit === 'currency'
+              ? `${diffPositive ? '+' : '-'} NT$ ${Math.abs(diff).toLocaleString()}`
+              : diffUnit === 'cases'
+              ? `${diffPositive ? '+' : ''}${diff} 件`
+              : `${diffPositive ? '+' : ''}${diff} hr`}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
+function LawyerCard({ lawyer }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col shrink-0 overflow-hidden" style={{ width: 'var(--card-width)' }}>
 
-      {/* Header */}
-      <div className="px-5 py-3.5 flex items-center justify-between bg-[#1E3480]">
+      {/* Header — 固定不捲動 */}
+      <div className="px-5 py-3.5 flex items-center justify-between bg-[#1E3480] shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-white font-bold text-lg tracking-widest leading-none">{lawyer.id}</span>
+          <span className="text-white font-bold text-2xl tracking-widest leading-none">{lawyer.id}</span>
           <span className="text-white/50 text-xs">律師</span>
         </div>
         <div className="flex flex-col items-end gap-1">
@@ -123,7 +165,7 @@ function LawyerCard({ lawyer }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-0 p-4">
+      <div className="flex flex-col gap-0 p-4 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
 
         {/* ① 工作量 */}
         <div className="flex items-center gap-4 pb-4">
@@ -148,68 +190,46 @@ function LawyerCard({ lawyer }) {
 
         <div className="h-px bg-gray-100 mb-4" />
 
-        {/* ② 本月結案進度 */}
-        <div className="pb-4">
-          <div className="flex items-center justify-between mb-2">
-            <SectionLabel>本月結案進度</SectionLabel>
-            <span className={`text-xs font-bold ${attainment >= 100 ? 'text-emerald-500' : attainment >= 70 ? 'text-[#1E3480]' : 'text-orange-500'}`}>
-              {attainment}%
-            </span>
-          </div>
-          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
-            <div
-              className={`h-full rounded-full transition-all ${attainment >= 100 ? 'bg-emerald-400' : attainment >= 70 ? 'bg-[#1E3480]' : 'bg-orange-400'}`}
-              style={{ width: `${Math.min(attainment, 100)}%` }}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-xs text-gray-400">本月預計</span>
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-bold text-gray-400">{lawyer.plannedCloseThisMonth}</span>
-                <span className="text-xs text-gray-300">件</span>
-              </div>
-            </div>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-gray-200">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-            <div className="flex flex-col items-center gap-0.5">
-              <span className="text-xs text-gray-400">本月實際</span>
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-lg font-bold text-[#1E3480]">{lawyer.closedThisMonth}</span>
-                <span className="text-xs text-gray-400">件</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* ② 本季結案 */}
+        <QuarterKpiBlock
+          sectionLabel="本季結案"
+          targetDisplay={`${lawyer.plannedCloseQ} 件`}
+          currentDisplay={`${lawyer.closedQ} 件`}
+          currentValue={lawyer.closedQ}
+          lastQValue={lawyer.closedLastQ}
+          diffUnit="cases"
+          rate={lawyer.plannedCloseQ > 0 ? Math.round((lawyer.closedQ / lawyer.plannedCloseQ) * 100) : 0}
+        />
 
         <div className="h-px bg-gray-100 mb-4" />
 
-        {/* ③ 計費時數 */}
-        <div className="pb-4">
-          <p className="text-xs text-gray-400 mb-0.5">本月計費時數</p>
-          <div className="flex items-baseline gap-2">
-            <div className="flex items-baseline gap-0.5">
-              <span className="text-lg font-bold text-[#1E3480]">{lawyer.billingHours}</span>
-              <span className="text-xs text-gray-400">hr</span>
-            </div>
-            {lawyer.billingHours !== lawyer.billingHoursLastMonth && (
-              <div className={`flex items-center gap-0.5 text-xs font-semibold ${lawyer.billingHours > lawyer.billingHoursLastMonth ? 'text-emerald-500' : 'text-red-400'}`}>
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  {lawyer.billingHours > lawyer.billingHoursLastMonth
-                    ? <polyline points="18 15 12 9 6 15" />
-                    : <polyline points="6 9 12 15 18 9" />}
-                </svg>
-                {Math.abs(lawyer.billingHours - lawyer.billingHoursLastMonth)}hr
-              </div>
-            )}
-          </div>
-          <p className="text-xs text-gray-300 mt-0.5">上月 {lawyer.billingHoursLastMonth}hr</p>
-        </div>
+        {/* ③ 本季計費時數 */}
+        <QuarterKpiBlock
+          sectionLabel="本季計費時數"
+          targetDisplay={`${lawyer.billingHoursQTarget} hr`}
+          currentDisplay={`${lawyer.billingHoursQ} hr`}
+          currentValue={lawyer.billingHoursQ}
+          lastQValue={lawyer.billingHoursLastQ}
+          diffUnit="hours"
+          rate={lawyer.billingHoursQTarget > 0 ? Math.round((lawyer.billingHoursQ / lawyer.billingHoursQTarget) * 100) : 0}
+        />
 
         <div className="h-px bg-gray-100 mb-4" />
 
-        {/* ④ 案件分布 */}
+        {/* ④ 本季財務 */}
+        <QuarterKpiBlock
+          sectionLabel="本季財務"
+          targetDisplay={`NT$ ${lawyer.receivableAmount.toLocaleString()}`}
+          currentDisplay={`NT$ ${lawyer.receivedAmount.toLocaleString()}`}
+          currentValue={lawyer.receivedAmount}
+          lastQValue={lawyer.receivedAmountLastQ}
+          diffUnit="currency"
+          rate={lawyer.receivableAmount > 0 ? Math.round((lawyer.receivedAmount / lawyer.receivableAmount) * 100) : 0}
+        />
+
+        <div className="h-px bg-gray-100 mb-4" />
+
+        {/* ⑤ 案件分布 */}
         <div>
           <SectionLabel>進行案件明細</SectionLabel>
           <CaseTypeBars caseTypes={lawyer.caseTypes} />
