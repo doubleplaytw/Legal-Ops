@@ -4,14 +4,13 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { MOCK_LAWYERS } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
 
-const MAX_CASES = Math.max(...MOCK_LAWYERS.map((l) => l.activeCases))
-
 const SORT_OPTIONS = [
   { value: 'id',       label: '字母 A → L' },
   { value: 'active',   label: '進行中案件（多→少）' },
   { value: 'deadline', label: '到期件數（多→少）' },
   { value: 'billing',  label: '計費時數（多→少）' },
   { value: 'closed',   label: '本月實際結案（多→少）' },
+  { value: 'newcases', label: '本月新收案件（多→少）' },
   { value: 'cycle',    label: '平均週期（長→短）' },
   { value: 'overdue',  label: '已逾期件數（多→少）' },
 ]
@@ -23,27 +22,31 @@ function sortLawyers(lawyers, key) {
     if (key === 'deadline') return b.upcomingDeadlines - a.upcomingDeadlines
     if (key === 'billing')  return b.billingHours - a.billingHours
     if (key === 'closed')   return b.closedThisMonth - a.closedThisMonth
+    if (key === 'newcases') return b.newCasesThisMonth - a.newCasesThisMonth
     if (key === 'cycle')    return b.avgCycleDays - a.avgCycleDays
     if (key === 'overdue')  return b.overdue.expired - a.overdue.expired
     return 0
   })
 }
 
-function MiniDonut({ cases, max }) {
-  const pct = Math.round((cases / max) * 100)
+function MiniDonut({ cases, capacity }) {
+  const pct = Math.round((cases / capacity) * 100)
   const data = [{ value: pct }, { value: 100 - pct }]
+  const isNearFull = pct >= 80
+  const fillColor = isNearFull ? '#E8A020' : '#1E3480'
   return (
-    <div className="relative w-16 h-16 mx-auto">
+    <div className="relative w-16 h-16 mx-auto shrink-0">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie data={data} dataKey="value" cx="50%" cy="50%" innerRadius={20} outerRadius={29} startAngle={90} endAngle={-270} strokeWidth={0}>
-            <Cell fill="#1E3480" />
+            <Cell fill={fillColor} />
             <Cell fill="#F0F2F8" />
           </Pie>
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm font-bold text-[#1E3480] leading-none">{cases}</span>
+        <span className="text-xs font-bold leading-none" style={{ color: fillColor }}>{cases}</span>
+        <span className="text-[9px] text-gray-300 leading-none mt-0.5">/{capacity}</span>
       </div>
     </div>
   )
@@ -124,10 +127,22 @@ function LawyerCard({ lawyer }) {
 
         {/* ① 工作量 */}
         <div className="flex items-center gap-4 pb-4">
-          <MiniDonut cases={lawyer.activeCases} max={MAX_CASES} />
-          <div className="flex flex-col gap-0.5">
-            <p className="text-xs text-gray-400">進行中案件</p>
-            <p className="text-sm font-bold text-[#1E3480]">{lawyer.activeCases} 件</p>
+          <MiniDonut cases={lawyer.activeCases} capacity={lawyer.caseCapacity} />
+          <div className="flex flex-col gap-2">
+            <div>
+              <p className="text-xs text-gray-400">進行中案件</p>
+              <div className="flex items-baseline gap-1">
+                <p className="text-sm font-bold text-[#1E3480]">{lawyer.activeCases}</p>
+                <p className="text-xs text-gray-300">/ {lawyer.caseCapacity} 件</p>
+              </div>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">本月新收</p>
+              <div className="flex items-baseline gap-0.5">
+                <p className="text-sm font-bold text-[#1E3480]">{lawyer.newCasesThisMonth}</p>
+                <p className="text-xs text-gray-400">件</p>
+              </div>
+            </div>
           </div>
         </div>
 

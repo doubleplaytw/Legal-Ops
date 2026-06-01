@@ -103,6 +103,19 @@ REACT_APP_ANTHROPIC_API_KEY=your_anthropic_key_here
 
 ---
 
+## 前端功能開發前提條件（強制）
+
+**任何前端功能在開發前，必須先確認：該功能所需的所有資料欄位，都可以在 Google Sheets 上由人工維護。**
+
+具體要求：
+- 新增一個顯示欄位 → 對應的 Google Sheets 工作表欄位必須已設計好（或可被計算得出）
+- 新增一個操作功能（新增、編輯、刪除）→ 必須能對應到 Sheets 的一列資料的寫入或更新
+- 若欄位需要自動計算（如「進行中案件數」從案件工作表 count 得出），需在 `sheets.js` 中說明計算邏輯，不得依賴前端 hardcode
+
+**違反此原則的功能不得合併進主線。**
+
+---
+
 ## Google Sheets 操作原則
 
 - **只透過 `src/services/sheets.js` 這個單一入口讀寫**，不在元件內直接呼叫 API
