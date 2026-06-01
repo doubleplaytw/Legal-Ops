@@ -344,10 +344,9 @@ export default function Dashboard() {
             <KpiCard label="事件已逾期" value={eventOverdueCount} unit="件" />
             <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" />
           </div>
-        </div>
 
-        {/* Upcoming Deadlines */}
-        <ChartCard title="下一個事件時間點">
+          {/* 下一個事件時間點 */}
+          <ChartCard title="下一個事件時間點">
             <div className="overflow-y-auto max-h-[400px] flex flex-col divide-y divide-gray-50 pr-1">
               {allEvents.map((item) => {
                   const cat = DEADLINE_CATEGORIES[item.category]
@@ -386,6 +385,7 @@ export default function Dashboard() {
                 })}
             </div>
           </ChartCard>
+        </div>
 
         {/* Pipeline Distribution + Conversion Funnel */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
