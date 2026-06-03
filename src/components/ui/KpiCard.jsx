@@ -1,4 +1,4 @@
-export default function KpiCard({ label, value, unit, sub, accent, trend, amount, className = '', variant }) {
+export default function KpiCard({ label, value, unit, sub, accent, trend, amount, amountPrimary, className = '', variant }) {
   const hasAlert = variant === 'danger' && value > 0
   const hasWarning = variant === 'warning' && value > 0
   const borderCls = hasAlert ? 'border-red-100' : hasWarning ? 'border-orange-100' : 'border-gray-100'
@@ -9,12 +9,19 @@ export default function KpiCard({ label, value, unit, sub, accent, trend, amount
     <div className={`rounded-2xl border shadow-sm px-6 py-5 flex flex-col gap-1 ${bgCls} ${borderCls} ${className}`}>
       <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{label}</p>
       <div className="flex items-baseline gap-1.5 mt-1 flex-wrap">
-        <span className={`text-3xl font-bold ${valueCls}`}>{value}</span>
-        {unit && <span className="text-base text-gray-500">{unit}</span>}
-        {amount != null && (
-          <span className="text-sm font-semibold text-gray-600 ml-1">
-            NT$ {amount.toLocaleString()}
-          </span>
+        {amountPrimary && amount != null ? (
+          <>
+            <span className={`text-3xl font-bold ${valueCls}`}>NT$ {amount.toLocaleString()}</span>
+            <span className="text-sm text-gray-400 ml-1">（{value} {unit}）</span>
+          </>
+        ) : (
+          <>
+            <span className={`text-3xl font-bold ${valueCls}`}>{value}</span>
+            {unit && <span className="text-base text-gray-500">{unit}</span>}
+            {amount != null && (
+              <span className="text-sm font-semibold text-gray-600 ml-1">NT$ {amount.toLocaleString()}</span>
+            )}
+          </>
         )}
       </div>
       <div className="flex items-center justify-between mt-0.5">

@@ -62,6 +62,30 @@ export const MOCK_CONSULTATION_CASES = [
   { type: '書狀撰寫', count: 5, date: '2026-04-08' },
 ]
 
+export const MOCK_CONSULTATION_HOURS = [
+  { type: '民事訴訟', hours: 12 },
+  { type: '刑事訴訟', hours:  5 },
+  { type: '家事案件', hours:  7 },
+  { type: '財富傳承', hours:  4 },
+  { type: '行政訴訟', hours:  3 },
+  { type: '勞資糾紛', hours:  4 },
+  { type: '智慧財產', hours:  4 },
+  { type: '商事相關', hours:  7 },
+  { type: '書狀撰寫', hours:  2 },
+]
+
+export const MOCK_QUARTERLY_REVENUE = [
+  { type: '民事訴訟', amount: 350000 },
+  { type: '商事相關', amount: 280000 },
+  { type: '刑事訴訟', amount: 160000 },
+  { type: '家事案件', amount: 130000 },
+  { type: '財富傳承', amount: 110000 },
+  { type: '勞資糾紛', amount:  85000 },
+  { type: '智慧財產', amount:  75000 },
+  { type: '行政訴訟', amount:  55000 },
+  { type: '書狀撰寫', amount:  35000 },
+]
+
 export const MOCK_KPI = {
   // 本月
   plannedCloseThisMonth: 11,
@@ -73,6 +97,14 @@ export const MOCK_KPI = {
   plannedCloseLastMonth: 9,
   closedLastMonth: 7,
   conversionRateLastMonth: 63,
+  // 本月目標
+  monthlyRevenueTarget:    55,
+  monthlyRevenueCurrent:   42,
+  monthlyRevenueLastMonth: 38,
+  conversionRateTarget:    75,
+  // 本季營收
+  quarterlyRevenue: 128,
+  quarterlyRevenueLastQuarter: 105,
   // 帳務（無上月比較基準，暫用靜態趨勢）
   overdueInvoices: 2,
   upcomingDeadlines: 3,
@@ -353,15 +385,15 @@ export const MOCK_CONVERSION_FUNNEL = [
 export const MOCK_APPEAL_FUNNEL = [
   { stage: '判決後追蹤', count: 24, color: '#94A3B8' },
   { stage: '通知客戶',   count: 18, color: '#F59E0B' },
-  { stage: '意願確認',   count: 10, color: '#E8A020' },
+  { stage: '意願確認',   count: 10, color: '#0D9488' },
   { stage: '完成委任',   count:  6, color: '#1E3480' },
 ]
 
 export const MOCK_RETAINER_FUNNEL = [
-  { stage: '到期前 30 天', count: 12, color: '#94A3B8' },
-  { stage: '主動聯繫',     count: 10, color: '#F59E0B' },
-  { stage: '確認意願',     count:  8, color: '#E8A020' },
-  { stage: '完成續約',     count:  7, color: '#1E3480' },
+  { stage: '到期前追蹤', count: 12, color: '#94A3B8' },
+  { stage: '通知客戶',   count: 10, color: '#F59E0B' },
+  { stage: '意願確認',   count:  8, color: '#0D9488' },
+  { stage: '完成續約',   count:  7, color: '#1E3480' },
 ]
 
 export const MOCK_CYCLE_DAYS_BY_TYPE = [
