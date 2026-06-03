@@ -281,7 +281,7 @@ export default function ClientSuccessView() {
           <h1 className="text-2xl font-bold text-[#1E3480]">客戶健康追蹤</h1>
           <p className="text-sm text-gray-500 mt-0.5">{sorted.length} 位追蹤中客戶</p>
         </div>
-        <div className="px-5 py-3 border-b border-gray-100 flex gap-1.5 shrink-0">
+        <div className="px-5 py-3 flex gap-1.5 shrink-0">
           {[
             { key: 'urgency', label: '急迫性' },
             { key: 'contact', label: '最後接觸' },

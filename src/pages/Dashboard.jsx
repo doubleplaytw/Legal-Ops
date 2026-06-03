@@ -179,7 +179,19 @@ function ConversionFunnelChart() { return <FunnelChart data={MOCK_CONVERSION_FUN
 function AppealFunnelChart()     { return <FunnelChart data={MOCK_APPEAL_FUNNEL} /> }
 function RetainerFunnelChart()   { return <FunnelChart data={MOCK_RETAINER_FUNNEL} /> }
 
+function BarTooltip({ label, value }) {
+  return (
+    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 pointer-events-none">
+      <div className="bg-gray-800 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+        {label}：{value}
+      </div>
+      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-[5px] border-transparent border-t-gray-800" />
+    </div>
+  )
+}
+
 function CycleDaysChart() {
+  const [hoveredIdx, setHoveredIdx] = useState(null)
   const max = Math.max(...MOCK_CYCLE_DAYS_BY_TYPE.map((d) => d.avgDays))
   const overall = Math.round(MOCK_CYCLE_DAYS_BY_TYPE.reduce((s, d) => s + d.avgDays, 0) / MOCK_CYCLE_DAYS_BY_TYPE.length)
   return (
@@ -188,19 +200,29 @@ function CycleDaysChart() {
         <span className="text-sm text-gray-500">全所平均</span>
         <span className="text-base font-bold text-[#1E3480]">{overall} 天</span>
       </div>
-      {MOCK_CYCLE_DAYS_BY_TYPE.map((d, i) => (
-        <div key={d.type} className="flex items-center gap-3">
-          <span className="text-sm text-gray-500 w-16 shrink-0 text-right leading-tight">{d.type}</span>
-          <div className="flex-1 h-7 bg-gray-50 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-3"
-              style={{ width: `${(d.avgDays / max) * 100}%`, backgroundColor: CASE_TYPE_COLORS[i] + 'CC' }}
-            >
-              <span className="text-xs font-semibold text-white whitespace-nowrap">{d.avgDays} 天</span>
+      {MOCK_CYCLE_DAYS_BY_TYPE.map((d, i) => {
+        const pct = (d.avgDays / max) * 100
+        const inside = pct >= 5
+        return (
+          <div
+            key={d.type}
+            className="flex items-center gap-3 relative"
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
+          >
+            <span className="text-sm text-gray-500 w-16 shrink-0 text-right leading-tight">{d.type}</span>
+            <div className="flex-1 h-7 bg-gray-50 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500 flex items-center justify-end pr-3"
+                style={{ width: `${pct}%`, backgroundColor: CASE_TYPE_COLORS[i] + 'CC' }}
+              >
+                {inside && <span className="text-xs font-semibold text-white whitespace-nowrap">{d.avgDays} 天</span>}
+              </div>
             </div>
+            {hoveredIdx === i && <BarTooltip label={d.type} value={`${d.avgDays} 天`} />}
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -209,6 +231,7 @@ function CycleDaysChart() {
 // ── Proposal chart components ─────────────────────────────────────────────────
 
 function HBarChart({ data, valueKey = 'count', labelKey = 'type', unit = '', formatFn }) {
+  const [hoveredIdx, setHoveredIdx] = useState(null)
   const max = Math.max(...data.map((d) => d[valueKey]))
   const sorted = [...data].sort((a, b) => b[valueKey] - a[valueKey])
   return (
@@ -219,17 +242,24 @@ function HBarChart({ data, valueKey = 'count', labelKey = 'type', unit = '', for
         const colorIdx = CASE_TYPES.indexOf(d[labelKey])
         const color = (colorIdx >= 0 ? CASE_TYPE_COLORS[colorIdx] : CASE_TYPE_COLORS[i % CASE_TYPE_COLORS.length])
         const label = formatFn ? formatFn(val) : `${val}${unit}`
+        const labelInside = pct >= 5
         return (
-          <div key={d[labelKey]} className="flex items-center gap-3">
+          <div
+            key={d[labelKey]}
+            className="flex items-center gap-3 relative"
+            onMouseEnter={() => setHoveredIdx(i)}
+            onMouseLeave={() => setHoveredIdx(null)}
+          >
             <span className="text-sm text-gray-500 w-16 shrink-0 text-right leading-tight">{d[labelKey]}</span>
             <div className="flex-1 h-7 bg-gray-50 rounded-full overflow-hidden">
               <div
                 className="h-full rounded-full flex items-center justify-end pr-3 transition-all duration-500"
                 style={{ width: `${pct}%`, backgroundColor: color + 'CC' }}
               >
-                <span className="text-xs font-semibold text-white whitespace-nowrap">{label}</span>
+                {labelInside && <span className="text-xs font-semibold text-white whitespace-nowrap">{label}</span>}
               </div>
             </div>
+            {hoveredIdx === i && <BarTooltip label={d[labelKey]} value={label} />}
           </div>
         )
       })}
@@ -342,13 +372,13 @@ export default function Dashboard() {
 
           {/* ── Row 2：三漏斗圖 ──────────────────────────────────────────── */}
 
-          <ChartCard title="客戶轉換漏斗" className="col-span-4 h-[330px]">
+          <ChartCard title="客戶轉換漏斗" className="col-span-12 lg:col-span-4 h-[330px]">
             <ConversionFunnelChart />
           </ChartCard>
-          <ChartCard title="上訴未委任追蹤" className="col-span-4 h-[330px]">
+          <ChartCard title="上訴未委任追蹤" className="col-span-12 lg:col-span-4 h-[330px]">
             <AppealFunnelChart />
           </ChartCard>
-          <ChartCard title="常年法顧續約追蹤" className="col-span-4 h-[330px]">
+          <ChartCard title="常年法顧續約追蹤" className="col-span-12 lg:col-span-4 h-[330px]">
             <RetainerFunnelChart />
           </ChartCard>
 
@@ -363,16 +393,16 @@ export default function Dashboard() {
 
           {/* ── Row 4：案件流程 + 進行中 + 結案 KPI（垂直堆疊） ─────────── */}
 
-          <ChartCard title="案件流程分布" className="col-span-4 h-[330px]">
+          <ChartCard title="案件流程分布" className="col-span-12 md:col-span-6 lg:col-span-4 h-[330px]">
             <CasePieChart
               data={PIPELINE_STAGES.map((s) => ({ type: s.label, count: MOCK_CASES.filter((c) => c.status === s.key).length })).filter((s) => s.count > 0)}
               colors={PIPELINE_STAGES.filter((s) => MOCK_CASES.some((c) => c.status === s.key)).map((s) => s.color)}
             />
           </ChartCard>
-          <ChartCard title="進行中案件" className="col-span-4 h-[330px]">
+          <ChartCard title="進行中案件" className="col-span-12 md:col-span-6 lg:col-span-4 h-[330px]">
             <CasePieChart data={MOCK_ACTIVE_CASES} />
           </ChartCard>
-          <div className="col-span-4 flex flex-col gap-4 self-stretch">
+          <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 self-stretch">
             <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="上月比較" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} className="flex-1" />
             <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth}       unit="件" sub="上月比較" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} className="flex-1" />
           </div>
@@ -401,10 +431,10 @@ export default function Dashboard() {
 
           {/* ── 時效警示（所有告警集中） ─────────────────────────────────── */}
 
-          <KpiCard label="結案已逾期"   value={overdueCount}      unit="件" variant={overdueCount      > 0 ? 'danger'  : undefined} className="col-span-3" />
-          <KpiCard label="結案即將逾期" value={warningCount}      unit="件" variant={warningCount      > 0 ? 'warning' : undefined} className="col-span-3" />
-          <KpiCard label="事件已逾期"   value={eventOverdueCount} unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} className="col-span-3" />
-          <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" variant={eventWarningCount > 0 ? 'warning' : undefined} className="col-span-3" />
+          <KpiCard label="結案已逾期"   value={overdueCount}      unit="件" variant={overdueCount      > 0 ? 'danger'  : undefined} className="col-span-6 md:col-span-3" />
+          <KpiCard label="結案即將逾期" value={warningCount}      unit="件" variant={warningCount      > 0 ? 'warning' : undefined} className="col-span-6 md:col-span-3" />
+          <KpiCard label="事件已逾期"   value={eventOverdueCount} unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} className="col-span-6 md:col-span-3" />
+          <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" variant={eventWarningCount > 0 ? 'warning' : undefined} className="col-span-6 md:col-span-3" />
 
           <KpiCard label="上訴待委任"     value={judgmentPendingCases.length} unit="件"
             variant={judgmentPendingCases.length > 0 ? 'warning' : undefined} className="col-span-6" />
@@ -424,25 +454,25 @@ export default function Dashboard() {
                 const chipClass = isOverdue ? 'bg-red-50 text-red-500' : isWarning ? 'bg-orange-50 text-orange-500' : 'bg-gray-50 text-gray-500'
                 const typeColor = CASE_TYPE_COLORS[CASE_TYPES.indexOf(c.type)] || CASE_TYPE_COLORS[0]
                 return (
-                  <div key={c.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium px-2 py-0.5 rounded-md"
+                  <div key={c.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0 gap-3">
+                    <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-sm font-medium px-2 py-0.5 rounded-md whitespace-nowrap shrink-0"
                           style={{ backgroundColor: typeColor + '20', color: typeColor }}>{c.type}</span>
-                        <span className="text-base font-semibold text-[#1E3480]">{c.cause}</span>
+                        <span className="text-base font-semibold text-[#1E3480] truncate">{c.cause}</span>
                       </div>
                       <div className="flex flex-col gap-1 pl-0.5">
-                        <span className="text-sm text-gray-600">{c.parties}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm text-gray-400">{c.id}</span>
-                          <span className="text-sm text-gray-300">·</span>
-                          <span className="text-sm text-gray-400">{c.lawyer} 律師</span>
+                        <span className="text-sm text-gray-600 truncate">{c.parties}</span>
+                        <div className="flex items-center gap-1.5 overflow-hidden">
+                          <span className="text-sm text-gray-400 whitespace-nowrap shrink-0">{c.id}</span>
+                          <span className="text-sm text-gray-300 shrink-0">·</span>
+                          <span className="text-sm text-gray-400 whitespace-nowrap">{c.lawyer} 律師</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-4">
-                      <span className="text-sm text-gray-500">{c.expectedCloseDate}</span>
-                      <span className={`text-base font-semibold px-3 py-1 rounded-full ${chipClass}`}>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm text-gray-500 whitespace-nowrap">{c.expectedCloseDate}</span>
+                      <span className={`text-base font-semibold px-3 py-1 rounded-full whitespace-nowrap ${chipClass}`}>
                         {isOverdue ? `${Math.abs(c.daysLeft)} 天前` : `${c.daysLeft} 天後`}
                       </span>
                     </div>
@@ -457,25 +487,25 @@ export default function Dashboard() {
               {allEvents.map((item) => {
                 const cat = DEADLINE_CATEGORIES[item.category]
                 return (
-                  <div key={item.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-sm font-semibold px-2 py-0.5 rounded-md ${cat.color}`}>{cat.label}</span>
-                        <span className="text-base font-semibold text-[#1E3480]">{item.taskTitle || item.cause}</span>
+                  <div key={item.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0 gap-3">
+                    <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`text-sm font-semibold px-2 py-0.5 rounded-md whitespace-nowrap shrink-0 ${cat.color}`}>{cat.label}</span>
+                        <span className="text-base font-semibold text-[#1E3480] truncate">{item.taskTitle || item.cause}</span>
                       </div>
                       <div className="flex flex-col gap-1 pl-0.5">
-                        <span className="text-sm text-gray-600">{item.parties}</span>
-                        {item.taskTitle && <span className="text-sm text-gray-500">{item.cause}</span>}
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm text-gray-400">{item.caseNo}</span>
-                          <span className="text-sm text-gray-300">·</span>
-                          <span className="text-sm text-gray-400">{item.lawyer}</span>
+                        <span className="text-sm text-gray-600 truncate">{item.parties}</span>
+                        {item.taskTitle && <span className="text-sm text-gray-500 truncate">{item.cause}</span>}
+                        <div className="flex items-center gap-1.5 overflow-hidden">
+                          <span className="text-sm text-gray-400 whitespace-nowrap shrink-0">{item.caseNo}</span>
+                          <span className="text-sm text-gray-300 shrink-0">·</span>
+                          <span className="text-sm text-gray-400 whitespace-nowrap">{item.lawyer}</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0 ml-4">
-                      <span className="text-sm text-gray-500">{item.date}</span>
-                      <span className={`text-base font-semibold px-3 py-1 rounded-full ${daysLeftColor(item.daysLeft)}`}>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-sm text-gray-500 whitespace-nowrap">{item.date}</span>
+                      <span className={`text-base font-semibold px-3 py-1 rounded-full whitespace-nowrap ${daysLeftColor(item.daysLeft)}`}>
                         {item.daysLeft < 0 ? `${Math.abs(item.daysLeft)} 天前` : `${item.daysLeft} 天後`}
                       </span>
                     </div>
