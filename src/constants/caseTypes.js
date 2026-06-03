@@ -7,6 +7,7 @@ export const CASE_TYPES = [
   '勞資糾紛',
   '智慧財產',
   '商事相關',
+  '書狀撰寫',
   '常年法務',
   '教育訓練',
 ]
@@ -21,6 +22,7 @@ export const CASE_TYPE_COLORS = [
   '#B87010',
   '#7AA0F0',
   '#94A3B8',
+  '#F59E0B',
   '#0D9488',
   '#7C3AED',
 ]

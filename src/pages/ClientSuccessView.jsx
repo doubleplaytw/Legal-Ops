@@ -18,7 +18,7 @@ function followUpUrgency(days) {
   if (days === 0) return { color: 'text-red-500',    label: '今天到期' }
   if (days <= 3)  return { color: 'text-red-500',    label: `${days} 天後` }
   if (days <= 7)  return { color: 'text-orange-500', label: `${days} 天後` }
-  return           { color: 'text-gray-400',         label: `${days} 天後` }
+  return           { color: 'text-gray-500',         label: `${days} 天後` }
 }
 
 function contactUrgencyColor(days) {
@@ -28,7 +28,7 @@ function contactUrgencyColor(days) {
 }
 
 const URGENCY_CONFIG = {
-  critical: { label: '緊急', color: 'bg-red-50 text-red-600 border border-red-100' },
+  critical: { label: '緊急',  color: 'bg-red-50 text-red-600 border border-red-100' },
   warning:  { label: '待處理', color: 'bg-amber-50 text-amber-600 border border-amber-100' },
   normal:   null,
 }
@@ -56,9 +56,8 @@ function getUrgency(client) {
 
 const URGENCY_SCORE = { critical: 0, warning: 1, normal: 2 }
 
-
 function SectionLabel({ children }) {
-  return <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{children}</p>
+  return <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">{children}</p>
 }
 
 function ContactLog({ contacts }) {
@@ -74,11 +73,11 @@ function ContactLog({ contacts }) {
             <div className="flex items-center gap-2 mb-1">
               <span className="text-sm font-semibold text-gray-700">{c.type}</span>
               <span className="text-gray-300">·</span>
-              <span className="text-xs text-gray-400">{c.date}</span>
+              <span className="text-sm text-gray-500">{c.date}</span>
               <span className="text-gray-300">·</span>
-              <span className="text-xs text-gray-400">{c.lawyer} 律師</span>
+              <span className="text-sm text-gray-500">{c.lawyer} 律師</span>
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed">{c.note}</p>
+            <p className="text-sm text-gray-600 leading-relaxed">{c.note}</p>
           </div>
         </div>
       ))}
@@ -105,16 +104,16 @@ function FollowUpList({ followUps }) {
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
                 {f.category && DEADLINE_CATEGORIES[f.category] && (
-                  <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${DEADLINE_CATEGORIES[f.category].color}`}>
+                  <span className={`text-sm font-medium px-1.5 py-0.5 rounded ${DEADLINE_CATEGORIES[f.category].color}`}>
                     {DEADLINE_CATEGORIES[f.category].label}
                   </span>
                 )}
                 <p className={`text-sm ${f.done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{f.task}</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">{f.date}</span>
+                <span className="text-sm text-gray-500">{f.date}</span>
                 {urgency && (
-                  <span className={`text-xs font-semibold ${urgency.color}`}>{urgency.label}</span>
+                  <span className={`text-sm font-semibold ${urgency.color}`}>{urgency.label}</span>
                 )}
               </div>
             </div>
@@ -129,7 +128,7 @@ function StatusBadge({ statusKey }) {
   const s = CASE_STATUSES.find((s) => s.key === statusKey)
   if (!s) return null
   return (
-    <span className="text-xs font-medium px-1.5 py-0.5 rounded whitespace-nowrap" style={{ color: s.color, backgroundColor: s.color + '18' }}>
+    <span className="text-sm font-medium px-1.5 py-0.5 rounded whitespace-nowrap" style={{ color: s.color, backgroundColor: s.color + '18' }}>
       {s.label}
     </span>
   )
@@ -147,24 +146,24 @@ function ClientListItem({ client, selected, onClick }) {
       }`}
     >
       <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${selected ? 'bg-[#1E3480]' : 'bg-[#1E3480]/10'}`}>
-        <span className={`text-xs font-bold ${selected ? 'text-white' : 'text-[#1E3480]'}`}>{client.lawyer}</span>
+        <span className={`text-sm font-bold ${selected ? 'text-white' : 'text-[#1E3480]'}`}>{client.lawyer}</span>
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 mb-0.5">
-          {urgencyConfig && (
-            <span className={`text-xs font-semibold px-1.5 py-0.5 rounded shrink-0 ${urgencyConfig.color}`}>
-              {urgencyConfig.label}
-            </span>
-          )}
-          <p className="text-sm font-semibold text-[#1E3480] truncate">{client.parties}</p>
-        </div>
-        <p className="text-xs text-gray-600 truncate">{client.cause}</p>
+        <p className="text-sm font-semibold text-[#1E3480] truncate mb-0.5">{client.parties}</p>
+        <p className="text-sm text-gray-600 truncate">{client.cause}</p>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <p className="text-xs text-gray-300 truncate">{client.caseNo}</p>
+          <p className="text-xs text-gray-400 truncate">{client.caseNo}</p>
           <StatusBadge statusKey={client.status} />
         </div>
       </div>
-      <span className={`text-xs font-medium shrink-0 ${contactUrgencyColor(days)}`}>{days} 天前</span>
+      <div className="flex flex-col items-end gap-1 shrink-0 ml-2">
+        {urgencyConfig && (
+          <span className={`text-sm font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${urgencyConfig.color}`}>
+            {urgencyConfig.label}
+          </span>
+        )}
+        <span className={`text-sm font-medium ${contactUrgencyColor(days)}`}>{days} 天前</span>
+      </div>
     </button>
   )
 }
@@ -175,10 +174,9 @@ function DetailPanel({ client, onBack, isDemoMode }) {
     <div className="flex flex-col h-full overflow-y-auto">
       {/* Client header */}
       <div className="px-4 md:px-8 py-5 md:py-6 border-b border-gray-100">
-        {/* Mobile back button */}
         <button
           onClick={onBack}
-          className="md:hidden flex items-center gap-1.5 text-xs font-semibold text-[#1E3480] mb-4"
+          className="md:hidden flex items-center gap-1.5 text-sm font-semibold text-[#1E3480] mb-4"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6" />
@@ -189,18 +187,18 @@ function DetailPanel({ client, onBack, isDemoMode }) {
           <h2 className="text-xl font-bold text-[#1E3480] truncate">{client.parties}</h2>
           <StatusBadge statusKey={client.status} />
         </div>
-        <p className="text-xs text-gray-600 mt-0.5">{client.cause}</p>
-        <p className="text-xs text-gray-600">{client.relief}</p>
-        <p className="text-xs text-gray-300 mt-1">{client.caseNo} · {client.lawyer} 律師</p>
+        <p className="text-sm text-gray-600 mt-0.5">{client.cause}</p>
+        <p className="text-sm text-gray-600">{client.relief}</p>
+        <p className="text-sm text-gray-400 mt-1">{client.caseNo} · {client.lawyer} 律師</p>
 
         <div className="flex flex-wrap items-center gap-4 mt-5">
           <div>
-            <p className="text-xs text-gray-400 mb-1">最後接觸</p>
+            <p className="text-sm text-gray-500 mb-1">最後接觸</p>
             <span className={`text-sm font-semibold ${contactUrgencyColor(days)}`}>{days} 天前（{client.lastContactDate}）</span>
           </div>
           <div className="w-px h-8 bg-gray-100" />
           <div>
-            <p className="text-xs text-gray-400 mb-1">接觸次數</p>
+            <p className="text-sm text-gray-500 mb-1">接觸次數</p>
             <span className="text-sm font-semibold text-gray-700">{client.contacts.length} 次</span>
           </div>
         </div>
@@ -208,11 +206,10 @@ function DetailPanel({ client, onBack, isDemoMode }) {
 
       {!isDemoMode && (
         <div className="px-4 md:px-8 py-6 flex flex-col gap-8">
-          {/* Contact log */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <SectionLabel>接觸紀錄</SectionLabel>
-              <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
+              <button className="text-sm font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
                 ＋ 新增紀錄
               </button>
             </div>
@@ -221,16 +218,15 @@ function DetailPanel({ client, onBack, isDemoMode }) {
 
           <div className="h-px bg-gray-100" />
 
-          {/* Drive links */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <SectionLabel>相關文件</SectionLabel>
-              <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
+              <button className="text-sm font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
                 ＋ 新增連結
               </button>
             </div>
             {client.driveLinks.length === 0 ? (
-              <p className="text-xs text-gray-300">尚未連結文件</p>
+              <p className="text-sm text-gray-400">尚未連結文件</p>
             ) : (
               <div className="flex flex-col gap-2">
                 {client.driveLinks.map((doc) => (
@@ -248,11 +244,10 @@ function DetailPanel({ client, onBack, isDemoMode }) {
 
           <div className="h-px bg-gray-100" />
 
-          {/* Follow ups */}
           <div>
             <div className="flex items-center justify-between mb-4">
               <SectionLabel>後續追蹤</SectionLabel>
-              <button className="text-xs font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
+              <button className="text-sm font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
                 ＋ 新增追蹤
               </button>
             </div>
@@ -280,30 +275,29 @@ export default function ClientSuccessView() {
   return (
     <div className="flex flex-col md:flex-row h-full">
 
-      {/* Left list — full width on mobile when no item selected, hidden when item selected */}
       <div className={`md:w-[260px] lg:w-[360px] md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
         <div className="px-5 py-5 border-b border-gray-100">
-          <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
-          <h1 className="text-lg font-bold text-[#1E3480]">客戶健康追蹤</h1>
-          <p className="text-xs text-gray-400 mt-0.5 mb-3">{sorted.length} 位追蹤中客戶</p>
-          <div className="flex gap-1">
-            {[
-              { key: 'urgency', label: '急迫性' },
-              { key: 'contact', label: '最後接觸' },
-            ].map((o) => (
-              <button
-                key={o.key}
-                onClick={() => setSortKey(o.key)}
-                className={`text-xs px-3 py-1 rounded-lg border transition-all ${
-                  sortKey === o.key
-                    ? 'bg-[#1E3480] border-[#1E3480] text-white font-semibold'
-                    : 'border-gray-200 text-gray-500 hover:border-[#1E3480] hover:text-[#1E3480]'
-                }`}
-              >
-                {o.label}
-              </button>
-            ))}
-          </div>
+          <p className="text-sm font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
+          <h1 className="text-2xl font-bold text-[#1E3480]">客戶健康追蹤</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{sorted.length} 位追蹤中客戶</p>
+        </div>
+        <div className="px-5 py-3 border-b border-gray-100 flex gap-1.5 shrink-0">
+          {[
+            { key: 'urgency', label: '急迫性' },
+            { key: 'contact', label: '最後接觸' },
+          ].map((o) => (
+            <button
+              key={o.key}
+              onClick={() => setSortKey(o.key)}
+              className={`text-sm px-3 py-1 rounded-lg border transition-all ${
+                sortKey === o.key
+                  ? 'bg-[#1E3480] border-[#1E3480] text-white font-semibold'
+                  : 'border-gray-200 text-gray-500 hover:border-[#1E3480] hover:text-[#1E3480]'
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
         </div>
         <div className="overflow-y-auto flex-1">
           {sorted.map((c) => (
@@ -317,7 +311,6 @@ export default function ClientSuccessView() {
         </div>
       </div>
 
-      {/* Right detail — full width on mobile when item selected, hidden when no item selected */}
       <div className={`flex-1 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
           ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} />

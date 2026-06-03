@@ -35,6 +35,7 @@ export const MOCK_ACTIVE_CASES = [
   { type: '勞資糾紛', count: 7 },
   { type: '智慧財產', count: 4 },
   { type: '商事相關', count: 10 },
+  { type: '書狀撰寫', count: 6 },
 ]
 
 export const MOCK_RETAINED_CASES = [
@@ -46,6 +47,7 @@ export const MOCK_RETAINED_CASES = [
   { type: '勞資糾紛', count: 3, date: '2026-01-30' },
   { type: '智慧財產', count: 2, date: '2026-04-15' },
   { type: '商事相關', count: 8, date: '2026-03-05' },
+  { type: '書狀撰寫', count: 4, date: '2026-04-10' },
 ]
 
 export const MOCK_CONSULTATION_CASES = [
@@ -57,6 +59,7 @@ export const MOCK_CONSULTATION_CASES = [
   { type: '勞資糾紛', count: 4, date: '2026-01-25' },
   { type: '智慧財產', count: 3, date: '2026-04-20' },
   { type: '商事相關', count: 6, date: '2026-03-15' },
+  { type: '書狀撰寫', count: 5, date: '2026-04-08' },
 ]
 
 export const MOCK_KPI = {
@@ -65,6 +68,7 @@ export const MOCK_KPI = {
   closedThisMonth: 9,
   conversionRate: 68,
   consultationHours: 48,
+  consultationHoursLastMonth: 44,
   // 上月底結算（比較基準）
   plannedCloseLastMonth: 9,
   closedLastMonth: 7,
@@ -81,15 +85,24 @@ export const MOCK_KPI = {
 }
 
 export const CASE_STATUSES = [
-  { key: 'appointment', label: '預約諮詢', color: '#94A3B8', bg: '#F8FAFC' },
-  { key: 'meeting',     label: '進行會晤', color: '#8B5CF6', bg: '#F5F3FF' },
-  { key: 'quote',       label: '報價',     color: '#0D9488', bg: '#F0FDFA' },
-  { key: 'signing',     label: '簽約',     color: '#F97316', bg: '#FFF7ED' },
-  { key: 'active',      label: '進行中',   color: '#1E3480', bg: '#EEF2FF' },
-  { key: 'closed',      label: '結案',     color: '#22C55E', bg: '#F0FDF4' },
+  { key: 'appointment',    label: '預約諮詢', color: '#94A3B8', bg: '#F8FAFC' },
+  { key: 'meeting',        label: '進行會晤', color: '#8B5CF6', bg: '#F5F3FF' },
+  { key: 'quote',          label: '報價',     color: '#0D9488', bg: '#F0FDFA' },
+  { key: 'signing',        label: '簽約',     color: '#F97316', bg: '#FFF7ED' },
+  { key: 'active',         label: '進行中',   color: '#1E3480', bg: '#EEF2FF' },
+  { key: 'pending_renewal',label: '待續委',   color: '#F59E0B', bg: '#FFFBEB' },
+  { key: 'closed',         label: '結案',     color: '#22C55E', bg: '#F0FDF4' },
 ]
 
 export const MOCK_CASES = [
+  // ── 待續委：判決未確定 ──────────────────────────────────────────────────────
+  { id: 'C-2026-056', parties: '劉○○',                 cause: '侵權行為損害賠償',   relief: '一審判決後待上訴決定', type: '民事訴訟', status: 'pending_renewal', lawyer: 'A', renewalReason: 'judgment', renewalDeadline: '2026-06-18', nextDeadline: null, expectedCloseDate: null, instanceLevel: '一審' },
+  { id: 'C-2026-055', parties: '○○建設股份有限公司',     cause: '工程承攬款項爭議',   relief: '一審敗訴待確認是否上訴', type: '商事相關', status: 'pending_renewal', lawyer: 'C', renewalReason: 'judgment', renewalDeadline: '2026-06-23', nextDeadline: null, expectedCloseDate: null, instanceLevel: '一審' },
+  // ── 待續委：常年法務合約到期 ─────────────────────────────────────────────────
+  { id: 'C-2025-088', parties: '○○科技股份有限公司',     cause: '常年法律顧問服務',   relief: '年度合約委任',         type: '常年法務', status: 'pending_renewal', lawyer: 'C', renewalReason: 'retainer', renewalDeadline: '2026-07-01', nextDeadline: '2026-07-01', expectedCloseDate: null },
+  { id: 'C-2025-076', parties: '○○醫療集團',             cause: '常年法律顧問服務',   relief: '年度合約委任',         type: '常年法務', status: 'pending_renewal', lawyer: 'K', renewalReason: 'retainer', renewalDeadline: '2026-06-25', nextDeadline: '2026-06-25', expectedCloseDate: null },
+  { id: 'C-2026-053', parties: '陳○○',                   cause: '土地所有權爭議',          relief: '準備書狀撰寫',              type: '書狀撰寫', status: 'active',      lawyer: 'A', nextDeadline: '2026-06-09', expectedCloseDate: '2026-06-20' },
+  { id: 'C-2026-052', parties: '○○實業股份有限公司',       cause: '股東會決議無效',          relief: '答辯書狀撰寫',              type: '書狀撰寫', status: 'signing',     lawyer: 'C', nextDeadline: '2026-06-12', expectedCloseDate: '2026-06-25' },
   { id: 'C-2026-051', parties: '王○○',                   cause: '侵權行為',           relief: '請求損害賠償',             type: '民事訴訟', status: 'appointment', lawyer: 'A', nextDeadline: null,         expectedCloseDate: null         },
   { id: 'C-2026-050', parties: '○○餐飲集團',              cause: '不當解雇爭議',         relief: '確認僱傭關係存在',           type: '勞資糾紛', status: 'meeting',     lawyer: 'B', nextDeadline: null,         expectedCloseDate: null         },
   { id: 'C-2026-049', parties: '林○○',                   cause: '遺囑信託',            relief: '信託規劃諮詢',              type: '財富傳承', status: 'quote',       lawyer: 'E', nextDeadline: null,         expectedCloseDate: null         },
@@ -99,7 +112,7 @@ export const MOCK_CASES = [
   { id: 'C-2026-046', parties: '○○建設股份有限公司',       cause: '工程承攬契約爭議',      relief: '請求給付工程款',             type: '商事相關', status: 'active',    lawyer: 'C', nextDeadline: '2026-06-08', expectedCloseDate: '2026-08-30' },
   { id: 'C-2026-041', parties: '王○○',                   cause: '借貸契約爭議',         relief: '請求給付借款',               type: '民事訴訟', status: 'active',      lawyer: 'A', nextDeadline: '2026-05-28', expectedCloseDate: '2026-06-15', subCases: ['C-2026-041-A'], pendingReview: false },
   { id: 'C-2026-040', parties: '○○製藥股份有限公司',       cause: '專利侵權',            relief: '損害賠償及停止侵害',          type: '智慧財產', status: 'active',      lawyer: 'B', nextDeadline: '2026-06-02', expectedCloseDate: '2026-05-20', subCases: ['C-2026-040-A'], pendingReview: false },
-  { id: 'C-2026-039', parties: '劉○○（被告）',            cause: '詐欺罪嫌',            relief: '無罪辯護',                  type: '刑事訴訟', status: 'active',      lawyer: 'D', nextDeadline: '2026-06-05', expectedCloseDate: '2026-05-10', subCases: ['C-2026-039-A'], pendingReview: false },
+  { id: 'C-2026-039', parties: '劉○○',            cause: '詐欺罪嫌',            relief: '無罪辯護',                  type: '刑事訴訟', status: 'active',      lawyer: 'D', nextDeadline: '2026-06-05', expectedCloseDate: '2026-05-10', subCases: ['C-2026-039-A'], pendingReview: false },
   { id: 'C-2026-038', parties: '○○物流股份有限公司',       cause: '行政裁罰處分',         relief: '撤銷原處分',                type: '行政訴訟', status: 'active',      lawyer: 'F', nextDeadline: '2026-06-01', expectedCloseDate: '2026-06-10' },
   { id: 'C-2026-037', parties: '陳○○',                   cause: '繼承爭議',            relief: '遺產分割',                  type: '財富傳承', status: 'active',      lawyer: 'H', nextDeadline: '2026-06-12', expectedCloseDate: '2026-08-01' },
   { id: 'C-2026-036', parties: '○○電商股份有限公司',       cause: '消費者保護爭議',        relief: '集體損害賠償',               type: '商事相關', status: 'active',      lawyer: 'C', nextDeadline: '2026-06-20', expectedCloseDate: '2026-09-01' },
@@ -112,7 +125,7 @@ export const MOCK_CASES = [
   // --- 子案：上訴 ---
   { id: 'C-2026-041-A', parties: '王○○',                 cause: '借貸契約爭議',         relief: '請求給付借款',         type: '民事訴訟', status: 'signing',  lawyer: 'A', nextDeadline: '2026-06-15', expectedCloseDate: '2026-10-30', parentCaseId: 'C-2026-041', subType: 'appeal',      instanceLevel: '二審' },
   { id: 'C-2026-040-A', parties: '○○製藥股份有限公司',     cause: '專利侵權',            relief: '損害賠償及停止侵害',    type: '智慧財產', status: 'active',   lawyer: 'B', nextDeadline: '2026-06-20', expectedCloseDate: '2026-11-15', parentCaseId: 'C-2026-040', subType: 'appeal',      instanceLevel: '二審' },
-  { id: 'C-2026-039-A', parties: '劉○○（被告）',          cause: '詐欺罪嫌',            relief: '無罪辯護',             type: '刑事訴訟', status: 'quote',    lawyer: 'D', nextDeadline: null,         expectedCloseDate: null,         parentCaseId: 'C-2026-039', subType: 'appeal',      instanceLevel: '二審' },
+  { id: 'C-2026-039-A', parties: '劉○○',          cause: '詐欺罪嫌',            relief: '無罪辯護',             type: '刑事訴訟', status: 'quote',    lawyer: 'D', nextDeadline: null,         expectedCloseDate: null,         parentCaseId: 'C-2026-039', subType: 'appeal',      instanceLevel: '二審' },
 
   // --- 子案：強制執行 ---
   { id: 'C-2026-020-A', parties: '○○金融股份有限公司',     cause: '借貸契約履行',         relief: '強制執行',                  type: '商事相關', status: 'active', lawyer: 'K', nextDeadline: '2026-06-10', expectedCloseDate: '2026-08-01', parentCaseId: 'C-2026-020', subType: 'enforcement', instanceLevel: null },
@@ -322,19 +335,33 @@ export const MOCK_CLIENT_HEALTH = [
 ]
 
 export const MOCK_UPCOMING_DEADLINES = [
-  { id: 1, caseNo: 'C-2026-041', parties: '王○○',               cause: '借貸契約爭議',   relief: '請求給付借款',         caseType: '民事訴訟', category: 'STATUTORY', date: '2026-05-28', daysLeft: 2, lawyer: 'A 律師' },
-  { id: 2, caseNo: 'C-2026-033', parties: '○○科技股份有限公司',   cause: '商標侵權',       relief: '損害賠償及排除侵害',     caseType: '智慧財產', category: 'HEARING',   date: '2026-05-30', daysLeft: 4, lawyer: 'B 律師' },
-  { id: 3, caseNo: 'C-2026-027', parties: '張○○',               cause: '繼承爭議',       relief: '遺產分割',             caseType: '財富傳承', category: 'FILING',    date: '2026-06-01', daysLeft: 6, lawyer: 'A 律師' },
-  { id: 4, caseNo: 'C-2026-019', parties: '○○建設股份有限公司',   cause: '不動產交易爭議', relief: '請求返還價金',           caseType: '商事相關', category: 'RETAINER',  date: '2026-06-01', daysLeft: 6, lawyer: 'C 律師' },
-  { id: 5, caseNo: 'C-2026-015', parties: '林○○',               cause: '勞資爭議',       relief: '仲裁請求',             caseType: '勞資糾紛', category: 'INVOICE',   date: '2026-06-02', daysLeft: 7, lawyer: 'B 律師' },
+  { id: 1, caseNo: 'C-2026-041', parties: '王○○',               cause: '借貸契約爭議',   relief: '請求給付借款',         caseType: '民事訴訟', category: 'STATUTORY', action: '上訴申請截止',     date: '2026-05-28', daysLeft: 2, lawyer: 'A 律師' },
+  { id: 2, caseNo: 'C-2026-033', parties: '○○科技股份有限公司',   cause: '商標侵權',       relief: '損害賠償及排除侵害',     caseType: '智慧財產', category: 'HEARING',   action: '第一次言詞辯論期日', date: '2026-05-30', daysLeft: 4, lawyer: 'B 律師' },
+  { id: 3, caseNo: 'C-2026-027', parties: '張○○',               cause: '繼承爭議',       relief: '遺產分割',             caseType: '財富傳承', category: 'FILING',    action: '準備書狀提出期限', date: '2026-06-01', daysLeft: 6, lawyer: 'A 律師' },
+  { id: 4, caseNo: 'C-2026-019', parties: '○○建設股份有限公司',   cause: '不動產交易爭議', relief: '請求返還價金',           caseType: '商事相關', category: 'RETAINER',  action: '委任合約到期',     date: '2026-06-01', daysLeft: 6, lawyer: 'C 律師' },
+  { id: 5, caseNo: 'C-2026-015', parties: '林○○',               cause: '勞資爭議',       relief: '仲裁請求',             caseType: '勞資糾紛', category: 'INVOICE',   action: '律師費用繳付期限', date: '2026-06-02', daysLeft: 7, lawyer: 'B 律師' },
 ]
 
 export const MOCK_CONVERSION_FUNNEL = [
-  { stage: '初次諮詢', count: 38, color: '#94A3B8' },
+  { stage: '預約諮詢', count: 38, color: '#94A3B8' },
   { stage: '進行會晤', count: 28, color: '#8B5CF6' },
-  { stage: '提出報價', count: 22, color: '#0D9488' },
-  { stage: '完成簽約', count: 18, color: '#F97316' },
-  { stage: '確定委任', count: 15, color: '#1E3480' },
+  { stage: '報價',     count: 22, color: '#0D9488' },
+  { stage: '簽約',     count: 18, color: '#F97316' },
+  { stage: '進行中',   count: 15, color: '#1E3480' },
+]
+
+export const MOCK_APPEAL_FUNNEL = [
+  { stage: '判決後追蹤', count: 24, color: '#94A3B8' },
+  { stage: '通知客戶',   count: 18, color: '#F59E0B' },
+  { stage: '意願確認',   count: 10, color: '#E8A020' },
+  { stage: '完成委任',   count:  6, color: '#1E3480' },
+]
+
+export const MOCK_RETAINER_FUNNEL = [
+  { stage: '到期前 30 天', count: 12, color: '#94A3B8' },
+  { stage: '主動聯繫',     count: 10, color: '#F59E0B' },
+  { stage: '確認意願',     count:  8, color: '#E8A020' },
+  { stage: '完成續約',     count:  7, color: '#1E3480' },
 ]
 
 export const MOCK_CYCLE_DAYS_BY_TYPE = [
@@ -346,6 +373,7 @@ export const MOCK_CYCLE_DAYS_BY_TYPE = [
   { type: '勞資糾紛', avgDays: 96  },
   { type: '智慧財產', avgDays: 156 },
   { type: '商事相關', avgDays: 72  },
+  { type: '書狀撰寫', avgDays: 14  },
 ]
 
 export const STATUTE_TYPES = ['消滅時效', '取得時效', '追訴時效', '除斥期間', '合約期間']

@@ -1,6 +1,19 @@
 import { useState, useMemo } from 'react'
 import { MOCK_STATUTES, STATUTE_TYPES } from '../constants/mockData'
-import { CASE_TYPES } from '../constants/caseTypes'
+import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
+
+function CaseTypeBadge({ type }) {
+  const idx = CASE_TYPES.indexOf(type)
+  const color = CASE_TYPE_COLORS[idx >= 0 ? idx : 0]
+  return (
+    <span
+      className="text-sm font-medium px-2 py-0.5 rounded-md whitespace-nowrap"
+      style={{ backgroundColor: color + '20', color }}
+    >
+      {type}
+    </span>
+  )
+}
 
 const TYPE_STYLE = {
   '消滅時效': 'bg-red-50 text-red-600 border border-red-100',
@@ -38,11 +51,9 @@ function StatuteRow({ s }) {
         )}
       </td>
       <td className="px-4 py-3.5 align-top">
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {s.caseTypes.map((t) => (
-            <span key={t} className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">
-              {t}
-            </span>
+            <CaseTypeBadge key={t} type={t} />
           ))}
         </div>
       </td>

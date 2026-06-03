@@ -46,6 +46,26 @@ function CaseTypeBadge({ type }) {
   )
 }
 
+function PendingRenewalBadge({ reason, deadline }) {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const daysLeft = Math.ceil((new Date(deadline) - today) / 86400000)
+  const urgent = daysLeft <= 7
+  const cls = urgent
+    ? 'bg-red-50 text-red-600 border border-red-100'
+    : 'bg-amber-50 text-amber-600 border border-amber-100'
+  const reasonLabel = reason === 'judgment' ? '判決未確定' : '合約即將到期'
+  const timeLabel = daysLeft > 0 ? `${daysLeft} 天後到期` : '已到期'
+  return (
+    <div className={`flex items-center gap-1.5 text-sm font-semibold px-2 py-1 rounded-lg w-fit ${cls}`}>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {reasonLabel}
+      <span className="font-normal opacity-75">· {timeLabel}</span>
+    </div>
+  )
+}
+
 const SUB_TYPE_LABEL = {
   appeal:      { text: '上訴', color: 'bg-violet-50 text-violet-600 border border-violet-100' },
   enforcement: { text: '強制執行', color: 'bg-amber-50 text-amber-600 border border-amber-100' },
@@ -88,6 +108,11 @@ function CaseCard({ c, allCases }) {
           </span>
           <span className="text-xs text-gray-400">父案 {c.parentCaseId}</span>
         </div>
+      )}
+
+      {/* 待續委 badge */}
+      {c.renewalReason && c.renewalDeadline && (
+        <PendingRenewalBadge reason={c.renewalReason} deadline={c.renewalDeadline} />
       )}
 
       {/* 訴訟三要素 + ID */}
@@ -155,6 +180,7 @@ export default function CaseView() {
   const [filterLawyer, setFilterLawyer] = useState('all')
   const [filterType, setFilterType] = useState('all')
   const [filterOverdue, setFilterOverdue] = useState(false)
+  const [filterPendingRenewal, setFilterPendingRenewal] = useState(false)
 
   const lawyers = ['all', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
@@ -166,9 +192,10 @@ export default function CaseView() {
         const cs = getCloseStatus(c.expectedCloseDate, c.status)
         if (!cs || cs.label !== '已逾期') return false
       }
+      if (filterPendingRenewal && c.status !== 'pending_renewal') return false
       return true
     })
-  }, [filterLawyer, filterType, filterOverdue])
+  }, [filterLawyer, filterType, filterOverdue, filterPendingRenewal])
 
   const byStatus = useMemo(() => {
     const map = {}
@@ -178,6 +205,7 @@ export default function CaseView() {
   }, [filtered])
 
   const overdueTotal = MOCK_CASES.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
+  const pendingRenewalTotal = MOCK_CASES.filter((c) => c.status === 'pending_renewal').length
 
   return (
     <div className="px-8 py-8 flex flex-col gap-6 h-full">
@@ -213,6 +241,13 @@ export default function CaseView() {
             filterOverdue ? 'bg-red-500 border-red-500 text-white font-semibold' : 'border-gray-200 text-gray-500 hover:border-red-400 hover:text-red-500'
           }`}>
           {filterOverdue ? '✕ 僅顯示已逾期' : `僅顯示已逾期${overdueTotal > 0 ? `（${overdueTotal}）` : ''}`}
+        </button>
+
+        <button onClick={() => setFilterPendingRenewal((v) => !v)}
+          className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
+            filterPendingRenewal ? 'bg-amber-500 border-amber-500 text-white font-semibold' : 'border-gray-200 text-gray-500 hover:border-amber-400 hover:text-amber-600'
+          }`}>
+          {filterPendingRenewal ? '✕ 僅顯示待續委' : `僅顯示待續委${pendingRenewalTotal > 0 ? `（${pendingRenewalTotal}）` : ''}`}
         </button>
 
         <span className="text-xs text-gray-400 ml-auto">共 {filtered.length} 件</span>

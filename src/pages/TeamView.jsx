@@ -153,7 +153,7 @@ function LawyerCard({ lawyer }) {
       <div className="px-5 py-3.5 flex items-center justify-between bg-[#1E3480] shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-white font-bold text-2xl tracking-widest leading-none">{lawyer.id}</span>
-          <span className="text-white/50 text-xs">律師</span>
+          <span className="text-white/70 text-2xl font-bold leading-none">律師</span>
         </div>
         <div className="flex flex-col items-end gap-1">
           <span className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${lawyer.overdue.expired > 0 ? 'bg-red-500 text-white' : 'bg-white/10 text-white/30'}`}>
@@ -175,7 +175,7 @@ function LawyerCard({ lawyer }) {
               <p className="text-xs text-gray-400">進行中案件</p>
               <div className="flex items-baseline gap-1">
                 <p className="text-sm font-bold text-[#1E3480]">{lawyer.activeCases}</p>
-                <p className="text-xs text-gray-300">/ {lawyer.caseCapacity} 件</p>
+                <p className="text-sm text-gray-500">/ {lawyer.caseCapacity} 件</p>
               </div>
             </div>
             <div>
