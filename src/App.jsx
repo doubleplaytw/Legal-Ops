@@ -5,14 +5,19 @@ import TeamView from './pages/TeamView'
 import CaseView from './pages/CaseView'
 import ClientSuccessView from './pages/ClientSuccessView'
 import StatutesView from './pages/StatutesView'
+import JudgmentView from './pages/JudgmentView'
 import './App.css'
 
-const PAGES = {
-  dashboard: <Dashboard />,
-  team: <TeamView />,
-  cases: <CaseView />,
-  clients: <ClientSuccessView />,
-  statutes: <StatutesView />,
+function renderPage(page, { judgmentLinks, onLink }) {
+  switch (page) {
+    case 'dashboard': return <Dashboard />
+    case 'team':      return <TeamView />
+    case 'cases':     return <CaseView />
+    case 'clients':   return <ClientSuccessView judgmentLinks={judgmentLinks} />
+    case 'statutes':  return <StatutesView />
+    case 'judgments': return <JudgmentView links={judgmentLinks} onLink={onLink} />
+    default:          return <Dashboard />
+  }
 }
 
 const NAV_ITEMS = [
@@ -65,10 +70,24 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+  {
+    key: 'judgments',
+    label: 'Case Law',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    ),
+  },
 ]
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard')
+  const [judgmentLinks, setJudgmentLinks] = useState([])
+
+  function handleLink(judgmentId, clientId) {
+    setJudgmentLinks(prev => [...prev, { judgmentId, clientId }])
+  }
 
   return (
     <div className="h-screen flex flex-col bg-[#F4F6FB] overflow-hidden">
@@ -91,7 +110,7 @@ function App() {
 
         {/* Main content — extra bottom padding on mobile for bottom nav */}
         <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-          {PAGES[activePage]}
+          {renderPage(activePage, { judgmentLinks, onLink: handleLink })}
         </main>
       </div>
 

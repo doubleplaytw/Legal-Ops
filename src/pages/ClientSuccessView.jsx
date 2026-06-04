@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MOCK_CLIENT_HEALTH, MOCK_CASES, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
+import { MOCK_CLIENT_HEALTH, MOCK_CASES, MOCK_JUDGMENTS, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
 import { useDemoMode } from '../hooks/useDemoMode'
 
 const TODAY = new Date()
@@ -168,7 +168,7 @@ function ClientListItem({ client, selected, onClick }) {
   )
 }
 
-function DetailPanel({ client, onBack, isDemoMode }) {
+function DetailPanel({ client, onBack, isDemoMode, linkedJudgments }) {
   const days = daysSince(client.lastContactDate)
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -219,7 +219,7 @@ function DetailPanel({ client, onBack, isDemoMode }) {
             <div className="mb-4">
               <SectionLabel>相關文件</SectionLabel>
             </div>
-            {client.driveLinks.length === 0 ? (
+            {client.driveLinks.length === 0 && linkedJudgments.length === 0 ? (
               <p className="text-sm text-gray-400">尚未連結文件</p>
             ) : (
               <div className="flex flex-col gap-2">
@@ -230,6 +230,16 @@ function DetailPanel({ client, onBack, isDemoMode }) {
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
                     </svg>
                     {doc.name}
+                  </a>
+                ))}
+                {linkedJudgments.map((j) => (
+                  <a key={j.id} href={j.url} target="_blank" rel="noreferrer"
+                    className="flex items-center gap-2.5 text-sm text-[#1E3480] hover:underline">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#E8A020]">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <span>{j.caseNo}</span>
+                    <span className="text-xs text-gray-400">· 參考判決</span>
                   </a>
                 ))}
               </div>
@@ -250,10 +260,17 @@ function DetailPanel({ client, onBack, isDemoMode }) {
   )
 }
 
-export default function ClientSuccessView() {
+export default function ClientSuccessView({ judgmentLinks = [] }) {
   const isDemoMode = useDemoMode()
   const [sortKey, setSortKey] = useState('urgency')
   const [selected, setSelected] = useState(null)
+
+  function getLinkedJudgments(clientId) {
+    const linkedIds = judgmentLinks
+      .filter(l => l.clientId === clientId)
+      .map(l => l.judgmentId)
+    return MOCK_JUDGMENTS.filter(j => linkedIds.includes(j.id))
+  }
 
   const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) => {
     if (sortKey === 'urgency') {
@@ -304,7 +321,7 @@ export default function ClientSuccessView() {
 
       <div className={`flex-1 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
-          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} />
+          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} linkedJudgments={getLinkedJudgments(selected.id)} />
           : null
         }
       </div>
