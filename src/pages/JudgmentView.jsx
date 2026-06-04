@@ -379,7 +379,7 @@ export default function JudgmentView({ links, onLink }) {
         <div className="flex items-end gap-4 mb-5">
           <div>
             <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Research</p>
-            <h1 className="text-2xl font-bold text-[#1E3480]">判例研究</h1>
+            <h1 className="text-2xl font-bold text-[#1E3480]">判決研究</h1>
           </div>
           <div className="mb-1 h-px flex-1 bg-gradient-to-r from-[#1E3480]/20 to-transparent" />
         </div>

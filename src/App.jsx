@@ -72,7 +72,7 @@ const NAV_ITEMS = [
   },
   {
     key: 'judgments',
-    label: 'Case Law',
+    label: 'Research',
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -83,7 +83,12 @@ const NAV_ITEMS = [
 
 function App() {
   const [activePage, setActivePage] = useState('dashboard')
-  const [judgmentLinks, setJudgmentLinks] = useState([])
+  const [judgmentLinks, setJudgmentLinks] = useState([
+    { judgmentId: 'JUD-005', clientId: 'ch-3' }, // ○○物流（行政訴訟）← 最高行政法院
+    { judgmentId: 'JUD-002', clientId: 'ch-2' }, // 王○○（借貸契約）← 高等法院借貸
+    { judgmentId: 'JUD-004', clientId: 'ch-1' }, // ○○科技（智慧財產）← 智慧財產法院
+    { judgmentId: 'JUD-001', clientId: 'ch-1' }, // ○○科技 第二筆
+  ])
 
   function handleLink(judgmentId, clientId) {
     setJudgmentLinks(prev => [...prev, { judgmentId, clientId }])
