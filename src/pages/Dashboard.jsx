@@ -387,8 +387,8 @@ export default function Dashboard() {
             <CasePieChart data={MOCK_ACTIVE_CASES} />
           </ChartCard>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 self-stretch">
-            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="上月比較" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} className="flex-1" />
-            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth}       unit="件" sub="上月比較" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} className="flex-1" />
+            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="金額比較" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} className="flex-1" />
+            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth}       unit="件" sub="金額比較" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} className="flex-1" />
           </div>
 
           {/* ── Row 5：營收分布 + 帳務 KPI ───────────────────────────────── */}
@@ -398,25 +398,20 @@ export default function Dashboard() {
           </ChartCard>
           <div className="col-span-6 flex flex-col gap-4 self-stretch">
             <div className="grid grid-cols-2 gap-4">
-              <KpiCard label="尚未請款案件"   value={MOCK_KPI.uninvoiced}     unit="件" sub="上月比較" trend={MOCK_KPI.uninvoicedTrend}     amount={MOCK_KPI.uninvoicedAmount}     amountPrimary />
-              <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="上月比較" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} amountPrimary />
+              <KpiCard label="尚未請款案件"   value={MOCK_KPI.uninvoiced}     unit="件" sub="金額比較" trend={MOCK_KPI.uninvoicedTrend}     amount={MOCK_KPI.uninvoicedAmount}     amountPrimary />
+              <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="金額比較" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} amountPrimary />
             </div>
             <KpiCard
               label="本月收款金額"
-              value={MOCK_KPI.monthlyRevenueCurrent}
-              unit="萬"
-              sub="上月比較"
+              value={MOCK_KPI.monthlyRevenueCount}
+              unit="件"
+              sub="金額比較"
               trend={calcTrend(MOCK_KPI.monthlyRevenueCurrent, MOCK_KPI.monthlyRevenueLastMonth, ' 萬')}
               amount={MOCK_KPI.monthlyRevenueCurrent * 10000}
               amountPrimary
               className="flex-1"
             />
           </div>
-
-          <KpiCard label="上訴待委任"     value={judgmentPendingCases.length} unit="件"
-            variant={judgmentPendingCases.length > 0 ? 'warning' : undefined} className="col-span-6" />
-          <KpiCard label="常年合約待續約" value={retainerPendingCases.length} unit="件"
-            variant={retainerPendingCases.length > 0 ? 'warning' : undefined} className="col-span-6" />
 
           <ChartCard title="下一個事件時間點" className="col-span-6 h-[330px]">
             <div className="flex-1 min-h-0 overflow-y-auto flex flex-col divide-y divide-gray-50 pr-1">
@@ -450,9 +445,11 @@ export default function Dashboard() {
               })}
             </div>
           </ChartCard>
-          <div className="col-span-6 flex flex-col gap-4 self-stretch">
-            <KpiCard label="事件已逾期"   value={eventOverdueCount} unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} className="flex-1" />
-            <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" variant={eventWarningCount > 0 ? 'warning' : undefined} className="flex-1" />
+          <div className="col-span-6 grid grid-cols-2 gap-4 self-stretch">
+            <KpiCard label="上訴待委任"     value={judgmentPendingCases.length} unit="件" variant={judgmentPendingCases.length > 0 ? 'warning' : undefined} />
+            <KpiCard label="常年合約待續約" value={retainerPendingCases.length} unit="件" variant={retainerPendingCases.length > 0 ? 'warning' : undefined} />
+            <KpiCard label="事件已逾期"     value={eventOverdueCount}           unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} />
+            <KpiCard label="事件即將逾期"   value={eventWarningCount}           unit="件" variant={eventWarningCount > 0 ? 'warning' : undefined} />
           </div>
 
           {/* ── 全寬分析 ───────────────────────────────────────────────────── */}

@@ -114,6 +114,7 @@ export const MOCK_KPI = {
   invoicedUnpaid: 3,
   invoicedUnpaidTrend: { label: '-1 件', up: false, positive: true },
   invoicedUnpaidAmount: 142000,
+  monthlyRevenueCount: 8,
 }
 
 export const CASE_STATUSES = [
