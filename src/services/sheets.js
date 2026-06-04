@@ -37,7 +37,8 @@
 
 const BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets'
 const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SPREADSHEET_ID
-const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY
+const API_KEY        = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY
+const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL
 
 async function fetchRange(range) {
   const url = `${BASE_URL}/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`
@@ -187,4 +188,26 @@ export async function fetchDriveLinks() {
     map[caseNo].push({ id: Number(id), name, url })
   })
   return map
+}
+
+// ── 諮詢預約表單寫入（透過 Apps Script）────────────────────────────────────
+
+/**
+ * 將 landing page 表單資料 POST 到 Google Apps Script Web App。
+ * Apps Script 負責寫入【案件】與【潛在客戶】兩個工作表。
+ *
+ * data 格式：
+ *   { name, phone, email, identity, companyName,
+ *     caseType, description, preferredDate, timeSlot, referral }
+ */
+export async function submitIntakeForm(data) {
+  if (!APPS_SCRIPT_URL) throw new Error('VITE_APPS_SCRIPT_URL 未設定')
+  // Content-Type 使用 text/plain 可避免 CORS preflight，Apps Script 仍可解析 JSON body
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(data),
+  })
+  if (!res.ok) throw new Error(`Apps Script error: ${res.status}`)
+  return res.json()
 }
