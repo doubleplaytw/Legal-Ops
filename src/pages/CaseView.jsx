@@ -72,7 +72,6 @@ const SUB_TYPE_LABEL = {
 }
 
 function CaseCard({ c, allCases }) {
-  const closeStatus = getCloseStatus(c.expectedCloseDate, c.status)
   const isSubCase = !!c.parentCaseId
   const subTypeInfo = isSubCase ? SUB_TYPE_LABEL[c.subType] : null
   const activeSubCount = c.subCases?.filter(id => {
@@ -83,21 +82,14 @@ function CaseCard({ c, allCases }) {
   return (
     <div className={`bg-white rounded-xl border shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col gap-3 cursor-pointer ${isSubCase ? 'border-l-4 border-l-violet-300 border-gray-100' : 'border-gray-100'}`}>
 
-      {/* Type + close status — 永遠置頂 */}
+      {/* Type + 子案 badge */}
       <div className="flex items-start justify-between gap-2">
         <CaseTypeBadge type={c.type} />
-        <div className="flex items-center gap-1.5">
-          {activeSubCount > 0 && (
-            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
-              子案 {activeSubCount}
-            </span>
-          )}
-          {closeStatus && (
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-md whitespace-nowrap ${closeStatus.class}`}>
-              {closeStatus.label}
-            </span>
-          )}
-        </div>
+        {activeSubCount > 0 && (
+          <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-violet-50 text-violet-600 border border-violet-100 whitespace-nowrap">
+            子案 {activeSubCount}
+          </span>
+        )}
       </div>
 
       {/* 子案標籤 — 案件類型下方 */}
@@ -113,6 +105,17 @@ function CaseCard({ c, allCases }) {
       {/* 待續委 badge */}
       {c.renewalReason && c.renewalDeadline && (
         <PendingRenewalBadge reason={c.renewalReason} deadline={c.renewalDeadline} />
+      )}
+
+      {/* 父案已結案但子案仍進行中 */}
+      {c.status === 'closed' && activeSubCount > 0 && (
+        <div className="flex items-center gap-1.5 text-xs font-semibold px-2 py-1.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-100">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          尚有 {activeSubCount} 件子案進行中
+        </div>
       )}
 
       {/* 訴訟三要素 + ID */}

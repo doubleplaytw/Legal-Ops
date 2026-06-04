@@ -207,11 +207,8 @@ function DetailPanel({ client, onBack, isDemoMode }) {
       {!isDemoMode && (
         <div className="px-4 md:px-8 py-6 flex flex-col gap-8">
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <SectionLabel>接觸紀錄</SectionLabel>
-              <button className="text-sm font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
-                ＋ 新增紀錄
-              </button>
             </div>
             <ContactLog contacts={client.contacts} />
           </div>
@@ -219,11 +216,8 @@ function DetailPanel({ client, onBack, isDemoMode }) {
           <div className="h-px bg-gray-100" />
 
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <SectionLabel>相關文件</SectionLabel>
-              <button className="text-sm font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
-                ＋ 新增連結
-              </button>
             </div>
             {client.driveLinks.length === 0 ? (
               <p className="text-sm text-gray-400">尚未連結文件</p>
@@ -245,11 +239,8 @@ function DetailPanel({ client, onBack, isDemoMode }) {
           <div className="h-px bg-gray-100" />
 
           <div>
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4">
               <SectionLabel>後續追蹤</SectionLabel>
-              <button className="text-sm font-semibold text-[#1E3480] bg-[#1E3480]/5 hover:bg-[#1E3480]/10 px-3 py-1.5 rounded-lg border border-[#1E3480]/10 transition-all">
-                ＋ 新增追蹤
-              </button>
             </div>
             <FollowUpList followUps={client.followUps} />
           </div>

@@ -9,12 +9,10 @@ const SORT_OPTIONS = [
   { value: 'active',   label: '進行中案件（多→少）' },
   { value: 'deadline', label: '到期件數（多→少）' },
   { value: 'billing',  label: '本季計費時數（多→少）' },
-  { value: 'closed',   label: '本季結案（多→少）' },
   { value: 'newcases',    label: '本月新收案件（多→少）' },
   { value: 'cycle',       label: '平均週期（長→短）' },
   { value: 'receivable',  label: '本季收款目標（多→少）' },
-  { value: 'collection',  label: '本季收款率（低→高）' },  // collectionRate 由前端計算
-  { value: 'overdue',     label: '已逾期件數（多→少）' },
+  { value: 'collection',  label: '本季收款率（低→高）' },
 ]
 
 function sortLawyers(lawyers, key) {
@@ -23,7 +21,6 @@ function sortLawyers(lawyers, key) {
     if (key === 'active')   return b.activeCases - a.activeCases
     if (key === 'deadline') return b.upcomingDeadlines - a.upcomingDeadlines
     if (key === 'billing')  return b.billingHoursQ - a.billingHoursQ
-    if (key === 'closed')   return b.closedQ - a.closedQ
     if (key === 'newcases')   return b.newCasesThisMonth - a.newCasesThisMonth
     if (key === 'cycle')      return b.avgCycleDays - a.avgCycleDays
     if (key === 'receivable') return b.receivableAmount - a.receivableAmount
@@ -32,7 +29,6 @@ function sortLawyers(lawyers, key) {
       const rateB = b.receivableAmount > 0 ? b.receivedAmount / b.receivableAmount : 0
       return rateA - rateB
     }
-    if (key === 'overdue')    return b.overdue.expired - a.overdue.expired
     return 0
   })
 }
@@ -150,19 +146,9 @@ function LawyerCard({ lawyer }) {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col shrink-0 overflow-hidden" style={{ width: 'var(--card-width)' }}>
 
       {/* Header — 固定不捲動 */}
-      <div className="px-5 py-3.5 flex items-center justify-between bg-[#1E3480] shrink-0">
-        <div className="flex items-center gap-2">
-          <span className="text-white font-bold text-2xl tracking-widest leading-none">{lawyer.id}</span>
-          <span className="text-white/70 text-2xl font-bold leading-none">律師</span>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${lawyer.overdue.expired > 0 ? 'bg-red-500 text-white' : 'bg-white/10 text-white/30'}`}>
-            結案已逾期 {lawyer.overdue.expired}
-          </span>
-          <span className={`text-xs font-semibold px-1.5 py-0.5 rounded whitespace-nowrap ${lawyer.overdue.warning > 0 ? 'bg-[#E8A020] text-white' : 'bg-white/10 text-white/30'}`}>
-            結案即將逾期 {lawyer.overdue.warning}
-          </span>
-        </div>
+      <div className="px-5 py-3.5 flex items-center bg-[#1E3480] shrink-0">
+        <span className="text-white font-bold text-2xl tracking-widest leading-none">{lawyer.id}</span>
+        <span className="text-white/70 text-2xl font-bold leading-none ml-2">律師</span>
       </div>
 
       <div className="flex flex-col gap-0 p-4 overflow-y-auto flex-1 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
@@ -190,20 +176,7 @@ function LawyerCard({ lawyer }) {
 
         <div className="h-px bg-gray-100 mb-4" />
 
-        {/* ② 本季結案 */}
-        <QuarterKpiBlock
-          sectionLabel="本季結案"
-          targetDisplay={`${lawyer.plannedCloseQ} 件`}
-          currentDisplay={`${lawyer.closedQ} 件`}
-          currentValue={lawyer.closedQ}
-          lastQValue={lawyer.closedLastQ}
-          diffUnit="cases"
-          rate={lawyer.plannedCloseQ > 0 ? Math.round((lawyer.closedQ / lawyer.plannedCloseQ) * 100) : 0}
-        />
-
-        <div className="h-px bg-gray-100 mb-4" />
-
-        {/* ③ 本季計費時數 */}
+        {/* ② 本季計費時數 */}
         <QuarterKpiBlock
           sectionLabel="本季計費時數"
           targetDisplay={`${lawyer.billingHoursQTarget} hr`}

@@ -280,17 +280,6 @@ export default function Dashboard() {
   const todayDate = new Date()
   todayDate.setHours(0, 0, 0, 0)
 
-  const overdueCount = MOCK_CASES.filter((c) => {
-    if (c.status === 'closed' || !c.expectedCloseDate) return false
-    return new Date(c.expectedCloseDate) < todayDate
-  }).length
-
-  const warningCount = MOCK_CASES.filter((c) => {
-    if (c.status === 'closed' || !c.expectedCloseDate) return false
-    const d = Math.ceil((new Date(c.expectedCloseDate) - todayDate) / 86400000)
-    return d >= 0 && d <= 30
-  }).length
-
   const followUpEvents = MOCK_CLIENT_HEALTH.flatMap((client) =>
     client.followUps.filter((f) => !f.done && f.date).map((f) => ({
       id: `fu-${client.id}-${f.id}`,
@@ -319,11 +308,6 @@ export default function Dashboard() {
   const eventOverdueCount = allEventsRaw.filter((e) => e.daysLeft < 0).length
   const eventWarningCount = allEventsRaw.filter((e) => e.daysLeft >= 0 && e.daysLeft <= 7).length
   const allEvents = allEventsRaw.slice(0, 10)
-
-  const closingCases = MOCK_CASES
-    .filter((c) => c.status !== 'closed' && c.expectedCloseDate)
-    .map((c) => ({ ...c, daysLeft: Math.ceil((new Date(c.expectedCloseDate) - todayDate) / 86400000) }))
-    .sort((a, b) => a.daysLeft - b.daysLeft)
 
   const judgmentPendingCases = MOCK_CASES.filter(c => c.status === 'pending_renewal' && c.renewalReason === 'judgment')
   const retainerPendingCases = MOCK_CASES.filter(c => c.status === 'pending_renewal' && c.renewalReason === 'retainer')
@@ -429,58 +413,10 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* ── 時效警示（所有告警集中） ─────────────────────────────────── */}
-
-          <KpiCard label="結案已逾期"   value={overdueCount}      unit="件" variant={overdueCount      > 0 ? 'danger'  : undefined} className="col-span-6 md:col-span-3" />
-          <KpiCard label="結案即將逾期" value={warningCount}      unit="件" variant={warningCount      > 0 ? 'warning' : undefined} className="col-span-6 md:col-span-3" />
-          <KpiCard label="事件已逾期"   value={eventOverdueCount} unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} className="col-span-6 md:col-span-3" />
-          <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" variant={eventWarningCount > 0 ? 'warning' : undefined} className="col-span-6 md:col-span-3" />
-
           <KpiCard label="上訴待委任"     value={judgmentPendingCases.length} unit="件"
             variant={judgmentPendingCases.length > 0 ? 'warning' : undefined} className="col-span-6" />
           <KpiCard label="常年合約待續約" value={retainerPendingCases.length} unit="件"
             variant={retainerPendingCases.length > 0 ? 'warning' : undefined} className="col-span-6" />
-
-          {/* ── 區塊 3：期限明細 ───────────────────────────────────────────── */}
-
-          <ChartCard title="結案期限明細" className="col-span-6 h-[330px]">
-            <div className="flex-1 min-h-0 overflow-y-auto flex flex-col divide-y divide-gray-50 pr-1">
-              {closingCases.length === 0 && (
-                <p className="text-sm text-gray-400 py-4 text-center">目前無待結案件</p>
-              )}
-              {closingCases.map((c) => {
-                const isOverdue = c.daysLeft < 0
-                const isWarning = !isOverdue && c.daysLeft <= 30
-                const chipClass = isOverdue ? 'bg-red-50 text-red-500' : isWarning ? 'bg-orange-50 text-orange-500' : 'bg-gray-50 text-gray-500'
-                const typeColor = CASE_TYPE_COLORS[CASE_TYPES.indexOf(c.type)] || CASE_TYPE_COLORS[0]
-                return (
-                  <div key={c.id} className="flex items-center justify-between py-4 first:pt-0 last:pb-0 gap-3">
-                    <div className="flex flex-col gap-1.5 min-w-0 overflow-hidden">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-sm font-medium px-2 py-0.5 rounded-md whitespace-nowrap shrink-0"
-                          style={{ backgroundColor: typeColor + '20', color: typeColor }}>{c.type}</span>
-                        <span className="text-base font-semibold text-[#1E3480] truncate">{c.cause}</span>
-                      </div>
-                      <div className="flex flex-col gap-1 pl-0.5">
-                        <span className="text-sm text-gray-600 truncate">{c.parties}</span>
-                        <div className="flex items-center gap-1.5 overflow-hidden">
-                          <span className="text-sm text-gray-400 whitespace-nowrap shrink-0">{c.id}</span>
-                          <span className="text-sm text-gray-300 shrink-0">·</span>
-                          <span className="text-sm text-gray-400 whitespace-nowrap">{c.lawyer} 律師</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-sm text-gray-500 whitespace-nowrap">{c.expectedCloseDate}</span>
-                      <span className={`text-base font-semibold px-3 py-1 rounded-full whitespace-nowrap ${chipClass}`}>
-                        {isOverdue ? `${Math.abs(c.daysLeft)} 天前` : `${c.daysLeft} 天後`}
-                      </span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </ChartCard>
 
           <ChartCard title="下一個事件時間點" className="col-span-6 h-[330px]">
             <div className="flex-1 min-h-0 overflow-y-auto flex flex-col divide-y divide-gray-50 pr-1">
@@ -514,6 +450,10 @@ export default function Dashboard() {
               })}
             </div>
           </ChartCard>
+          <div className="col-span-6 flex flex-col gap-4 self-stretch">
+            <KpiCard label="事件已逾期"   value={eventOverdueCount} unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} className="flex-1" />
+            <KpiCard label="事件即將逾期" value={eventWarningCount} unit="件" variant={eventWarningCount > 0 ? 'warning' : undefined} className="flex-1" />
+          </div>
 
           {/* ── 全寬分析 ───────────────────────────────────────────────────── */}
 
