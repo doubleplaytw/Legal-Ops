@@ -386,7 +386,7 @@ export default function JudgmentView({ links, onLink }) {
 
         <div className="flex flex-col gap-3">
 
-          {/* Row 1：關鍵字 + 案件類型 + 法院 */}
+          {/* Row 1：關鍵字 */}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="relative">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300">
@@ -400,10 +400,6 @@ export default function JudgmentView({ links, onLink }) {
                 className="text-xs border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white w-56"
               />
             </div>
-            <select value={filterCourt} onChange={e => setFilterCourt(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white">
-              {COURTS.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
             {hasFilters && (
               <button onClick={clearAll} className="text-xs text-gray-400 hover:text-gray-600 transition-colors">
                 清除全部
@@ -439,7 +435,16 @@ export default function JudgmentView({ links, onLink }) {
             </div>
           </div>
 
-          {/* Row 3：裁判字號 */}
+          {/* Row 3：法院 */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs text-gray-500 w-16 shrink-0">法院</span>
+            <select value={filterCourt} onChange={e => setFilterCourt(e.target.value)}
+              className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white">
+              {COURTS.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          {/* Row 4：裁判字號 */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs text-gray-500 w-16 shrink-0">裁判字號</span>
             <input

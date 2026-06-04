@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import CasePieChart from '../components/modules/CasePieChart'
 import KpiCard from '../components/ui/KpiCard'
+import LossReasonBar from '../components/ui/LossReasonBar'
 import { useDemoMode } from '../hooks/useDemoMode'
 import { CASE_TYPE_COLORS, CASE_TYPES } from '../constants/caseTypes'
 import {
@@ -16,8 +17,12 @@ import {
   MOCK_CONVERSION_FUNNEL,
   MOCK_APPEAL_FUNNEL,
   MOCK_RETAINER_FUNNEL,
+  MOCK_CONVERSION_LOSS_REASONS,
+  MOCK_APPEAL_LOSS_REASONS,
+  MOCK_RETAINER_LOSS_REASONS,
   MOCK_QUARTERLY_REVENUE,
   MOCK_CONSULTATION_HOURS,
+  MOCK_LAWYERS,
 } from '../constants/mockData'
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -32,6 +37,45 @@ function calcTrend(current, last, unit) {
   const diff = current - last
   if (diff === 0) return null
   return { label: `${diff > 0 ? '+' : ''}${diff}${unit}`, up: diff > 0, positive: diff > 0 }
+}
+
+function calcTrendNTD(currentWan, lastWan) {
+  const diff = (currentWan - lastWan) * 10000
+  if (diff === 0) return null
+  return { label: `${diff > 0 ? '+' : '-'}NT$ ${Math.abs(diff).toLocaleString()}`, up: diff > 0, positive: diff > 0 }
+}
+
+function lawyerLoadColor(pct) {
+  if (pct >= 90) return { bar: 'bg-red-400',     text: 'text-red-500',     badge: 'bg-red-50' }
+  if (pct >= 70) return { bar: 'bg-amber-400',   text: 'text-amber-500',   badge: 'bg-amber-50' }
+  return              { bar: 'bg-emerald-400', text: 'text-emerald-600', badge: 'bg-emerald-50' }
+}
+
+function LawyerWorkloadPanel() {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-4">
+      {MOCK_LAWYERS.map(l => {
+        const pct = Math.round((l.activeCases / l.caseCapacity) * 100)
+        const { bar, text, badge } = lawyerLoadColor(pct)
+        return (
+          <div key={l.id} className="flex items-center gap-3">
+            <span className={`w-8 h-8 rounded-full ${badge} ${text} text-sm font-bold flex items-center justify-center shrink-0`}>
+              {l.id}
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-baseline mb-1">
+                <span className={`text-xs font-bold ${text}`}>{pct}%</span>
+                <span className="text-xs text-gray-400">{l.activeCases}/{l.caseCapacity} 件</span>
+              </div>
+              <div className="bg-gray-100 rounded-full h-1.5">
+                <div className={`${bar} h-1.5 rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 function daysLeftColor(days) {
@@ -90,11 +134,12 @@ function GoalCard({ title, pct, target, current, lastMonth, unit, color, classNa
   )
 }
 
-function ChartCard({ title, badge, children, className = '' }) {
+function ChartCard({ title, badge, headerRight, children, className = '' }) {
   return (
     <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 flex flex-col gap-4 overflow-hidden ${className}`}>
       <div className="flex items-center justify-between shrink-0">
         <h2 className="text-sm font-semibold text-[#1E3480] tracking-widest uppercase">{title}</h2>
+        {headerRight && <div>{headerRight}</div>}
         {badge && (
           <span className="text-sm font-medium bg-[#E8A020]/10 text-[#B87010] px-2.5 py-1 rounded-full">{badge}</span>
         )}
@@ -175,9 +220,30 @@ function FunnelChart({ data }) {
   )
 }
 
-function ConversionFunnelChart() { return <FunnelChart data={MOCK_CONVERSION_FUNNEL} /> }
-function AppealFunnelChart()     { return <FunnelChart data={MOCK_APPEAL_FUNNEL} /> }
-function RetainerFunnelChart()   { return <FunnelChart data={MOCK_RETAINER_FUNNEL} /> }
+function ConversionFunnelChart() {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 min-h-0"><FunnelChart data={MOCK_CONVERSION_FUNNEL} /></div>
+      <LossReasonBar title="未簽約原因分布" reasons={MOCK_CONVERSION_LOSS_REASONS} />
+    </div>
+  )
+}
+function AppealFunnelChart() {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 min-h-0"><FunnelChart data={MOCK_APPEAL_FUNNEL} /></div>
+      <LossReasonBar title="未委任原因分布" reasons={MOCK_APPEAL_LOSS_REASONS} />
+    </div>
+  )
+}
+function RetainerFunnelChart() {
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 min-h-0"><FunnelChart data={MOCK_RETAINER_FUNNEL} /></div>
+      <LossReasonBar title="未續約原因分布" reasons={MOCK_RETAINER_LOSS_REASONS} />
+    </div>
+  )
+}
 
 function BarTooltip({ label, value }) {
   return (
@@ -356,13 +422,13 @@ export default function Dashboard() {
 
           {/* ── Row 2：三漏斗圖 ──────────────────────────────────────────── */}
 
-          <ChartCard title="客戶轉換漏斗" className="col-span-12 lg:col-span-4 h-[330px]">
+          <ChartCard title="客戶轉換漏斗" className="col-span-12 lg:col-span-4 h-[440px]">
             <ConversionFunnelChart />
           </ChartCard>
-          <ChartCard title="上訴未委任追蹤" className="col-span-12 lg:col-span-4 h-[330px]">
+          <ChartCard title="上訴未委任追蹤" className="col-span-12 lg:col-span-4 h-[440px]">
             <AppealFunnelChart />
           </ChartCard>
-          <ChartCard title="常年法顧續約追蹤" className="col-span-12 lg:col-span-4 h-[330px]">
+          <ChartCard title="常年法顧續約追蹤" className="col-span-12 lg:col-span-4 h-[440px]">
             <RetainerFunnelChart />
           </ChartCard>
 
@@ -387,8 +453,8 @@ export default function Dashboard() {
             <CasePieChart data={MOCK_ACTIVE_CASES} />
           </ChartCard>
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 self-stretch">
-            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" sub="金額比較" trend={calcTrend(MOCK_KPI.plannedCloseThisMonth, MOCK_KPI.plannedCloseLastMonth, ' 件')} className="flex-1" />
-            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth}       unit="件" sub="金額比較" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} className="flex-1" />
+            <KpiCard label="預計結案" value={MOCK_KPI.plannedCloseThisMonth} unit="件" className="flex-1" />
+            <KpiCard label="實際結案" value={MOCK_KPI.closedThisMonth}       unit="件" sub="與上月比較" trend={calcTrend(MOCK_KPI.closedThisMonth, MOCK_KPI.closedLastMonth, ' 件')} className="flex-1" />
           </div>
 
           {/* ── Row 5：營收分布 + 帳務 KPI ───────────────────────────────── */}
@@ -398,15 +464,15 @@ export default function Dashboard() {
           </ChartCard>
           <div className="col-span-6 flex flex-col gap-4 self-stretch">
             <div className="grid grid-cols-2 gap-4">
-              <KpiCard label="尚未請款案件"   value={MOCK_KPI.uninvoiced}     unit="件" sub="金額比較" trend={MOCK_KPI.uninvoicedTrend}     amount={MOCK_KPI.uninvoicedAmount}     amountPrimary />
-              <KpiCard label="已請款尚未付款" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="金額比較" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} amountPrimary />
+              <KpiCard label="尚未請款數量"       value={MOCK_KPI.uninvoiced}     unit="件" sub="與上月比較" trend={MOCK_KPI.uninvoicedTrend}     amount={MOCK_KPI.uninvoicedAmount}     amountPrimary />
+              <KpiCard label="已請款尚未付款數量" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="與上月比較" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} amountPrimary />
             </div>
             <KpiCard
-              label="本月收款金額"
+              label="本月收款數量"
               value={MOCK_KPI.monthlyRevenueCount}
               unit="件"
-              sub="金額比較"
-              trend={calcTrend(MOCK_KPI.monthlyRevenueCurrent, MOCK_KPI.monthlyRevenueLastMonth, ' 萬')}
+              sub="與上月比較"
+              trend={calcTrendNTD(MOCK_KPI.monthlyRevenueCurrent, MOCK_KPI.monthlyRevenueLastMonth)}
               amount={MOCK_KPI.monthlyRevenueCurrent * 10000}
               amountPrimary
               className="flex-1"
@@ -453,6 +519,20 @@ export default function Dashboard() {
           </div>
 
           {/* ── 全寬分析 ───────────────────────────────────────────────────── */}
+
+          <ChartCard
+            title="律師負載狀態"
+            className="col-span-12"
+            headerRight={
+              <div className="flex items-center gap-4 text-xs text-gray-400">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />正常 &lt;70%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />繁忙 70–89%</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />過載 ≥90%</span>
+              </div>
+            }
+          >
+            <LawyerWorkloadPanel />
+          </ChartCard>
 
           <ChartCard title="各案件類型平均結案週期" className="col-span-12">
             <CycleDaysChart />

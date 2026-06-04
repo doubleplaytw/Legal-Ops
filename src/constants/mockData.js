@@ -109,10 +109,10 @@ export const MOCK_KPI = {
   overdueInvoices: 2,
   upcomingDeadlines: 3,
   uninvoiced: 5,
-  uninvoicedTrend: { label: '-2 件', up: false, positive: true },
+  uninvoicedTrend: { label: '-NT$ 20,000', up: false, positive: true },
   uninvoicedAmount: 285000,
   invoicedUnpaid: 3,
-  invoicedUnpaidTrend: { label: '-1 件', up: false, positive: true },
+  invoicedUnpaidTrend: { label: '-NT$ 10,000', up: false, positive: true },
   invoicedUnpaidAmount: 142000,
   monthlyRevenueCount: 8,
 }
@@ -162,6 +162,38 @@ export const MOCK_CASES = [
 
   // --- 子案：強制執行 ---
   { id: 'C-2026-020-A', parties: '○○金融股份有限公司',     cause: '借貸契約履行',         relief: '強制執行',                  type: '商事相關', status: 'active', lawyer: 'K', nextDeadline: '2026-06-10', expectedCloseDate: '2026-08-01', parentCaseId: 'C-2026-020', subType: 'enforcement', instanceLevel: null },
+
+  // --- 律師 G ---
+  { id: 'C-2026-060', parties: '○○科技股份有限公司', cause: '商標侵權',       relief: '損害賠償',       type: '智慧財產', status: 'active',  lawyer: 'G', nextDeadline: '2026-06-18', expectedCloseDate: '2026-09-30' },
+  { id: 'C-2026-061', parties: '林○○',             cause: '著作權爭議',     relief: '排除侵害',       type: '智慧財產', status: 'meeting', lawyer: 'G', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-062', parties: '○○貿易股份有限公司', cause: '合約履行爭議',   relief: '請求給付貨款',   type: '商事相關', status: 'signing', lawyer: 'G', nextDeadline: '2026-06-25', expectedCloseDate: '2026-08-15' },
+  { id: 'C-2026-063', parties: '張○○',             cause: '侵權行為損害賠償', relief: '請求損害賠償',   type: '民事訴訟', status: 'active',  lawyer: 'G', nextDeadline: '2026-07-01', expectedCloseDate: '2026-10-01' },
+  { id: 'C-2026-064', parties: '王○○',             cause: '信託規劃',       relief: '信託設立諮詢',   type: '財富傳承', status: 'quote',   lawyer: 'G', nextDeadline: null,         expectedCloseDate: null },
+
+  // --- 律師 I ---
+  { id: 'C-2026-065', parties: '陳○○',             cause: '借貸契約爭議',   relief: '請求給付借款',   type: '民事訴訟', status: 'active',  lawyer: 'I', nextDeadline: '2026-06-14', expectedCloseDate: '2026-09-01' },
+  { id: 'C-2026-066', parties: '○○建設股份有限公司', cause: '工程款爭議',     relief: '請求給付工程款', type: '民事訴訟', status: 'signing', lawyer: 'I', nextDeadline: '2026-06-20', expectedCloseDate: '2026-08-30' },
+  { id: 'C-2026-067', parties: '○○實業股份有限公司', cause: '股份轉讓爭議',   relief: '確認股東資格',   type: '商事相關', status: 'active',  lawyer: 'I', nextDeadline: '2026-06-22', expectedCloseDate: '2026-09-15' },
+  { id: 'C-2026-068', parties: '○○科技股份有限公司', cause: '合約違約',       relief: '損害賠償',       type: '商事相關', status: 'quote',   lawyer: 'I', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-069', parties: '劉○○',             cause: '婚姻財產分配',   relief: '財產分割',       type: '家事案件', status: 'meeting', lawyer: 'I', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-070', parties: '吳○○',             cause: '遺產繼承規劃',   relief: '信託設立',       type: '財富傳承', status: 'active',  lawyer: 'I', nextDeadline: '2026-07-05', expectedCloseDate: '2026-10-15' },
+
+  // --- 律師 J ---
+  { id: 'C-2026-071', parties: '李○○',             cause: '詐欺罪嫌',       relief: '無罪辯護',       type: '刑事訴訟', status: 'active',  lawyer: 'J', nextDeadline: '2026-06-10', expectedCloseDate: '2026-12-01' },
+  { id: 'C-2026-072', parties: '黃○○',             cause: '背信罪嫌',       relief: '緩起訴',         type: '刑事訴訟', status: 'active',  lawyer: 'J', nextDeadline: '2026-06-17', expectedCloseDate: '2026-11-30' },
+  { id: 'C-2026-073', parties: '○○建設股份有限公司', cause: '偽造文書罪嫌',   relief: '無罪辯護',       type: '刑事訴訟', status: 'meeting', lawyer: 'J', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-074', parties: '陳○○',             cause: '行政裁罰處分',   relief: '撤銷原處分',     type: '行政訴訟', status: 'active',  lawyer: 'J', nextDeadline: '2026-06-28', expectedCloseDate: '2026-10-01' },
+  { id: 'C-2026-075', parties: '○○物流股份有限公司', cause: '環保裁罰爭議',   relief: '訴願申請',       type: '行政訴訟', status: 'signing', lawyer: 'J', nextDeadline: '2026-07-02', expectedCloseDate: '2026-09-30' },
+  { id: 'C-2026-076', parties: '林○○',             cause: '不當解雇爭議',   relief: '確認僱傭關係',   type: '勞資糾紛', status: 'quote',   lawyer: 'J', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-077', parties: '王○○',             cause: '侵權行為損害賠償', relief: '請求損害賠償',   type: '民事訴訟', status: 'active',  lawyer: 'J', nextDeadline: '2026-06-30', expectedCloseDate: '2026-10-30' },
+  { id: 'C-2026-078', parties: '○○製造股份有限公司', cause: '採購合約爭議',   relief: '請求給付款項',   type: '商事相關', status: 'meeting', lawyer: 'J', nextDeadline: null,         expectedCloseDate: null },
+
+  // --- 律師 L ---
+  { id: 'C-2026-079', parties: '張○○',             cause: '離婚',           relief: '子女監護權',     type: '家事案件', status: 'active',  lawyer: 'L', nextDeadline: '2026-06-19', expectedCloseDate: '2026-09-01' },
+  { id: 'C-2026-080', parties: '林○○',             cause: '家庭暴力',       relief: '聲請保護令',     type: '家事案件', status: 'meeting', lawyer: 'L', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-081', parties: '陳○○',             cause: '侵權行為損害賠償', relief: '請求損害賠償',   type: '民事訴訟', status: 'active',  lawyer: 'L', nextDeadline: '2026-06-26', expectedCloseDate: '2026-10-15' },
+  { id: 'C-2026-082', parties: '吳○○',             cause: '遺囑信託設立',   relief: '信託規劃諮詢',   type: '財富傳承', status: 'quote',   lawyer: 'L', nextDeadline: null,         expectedCloseDate: null },
+  { id: 'C-2026-083', parties: '○○餐飲股份有限公司', cause: '加盟合約爭議',   relief: '損害賠償',       type: '商事相關', status: 'signing', lawyer: 'L', nextDeadline: '2026-07-03', expectedCloseDate: '2026-09-15' },
 ]
 
 export const CONTACT_TYPES = [
@@ -395,6 +427,24 @@ export const MOCK_RETAINER_FUNNEL = [
   { stage: '通知客戶',   count: 10, color: '#F59E0B' },
   { stage: '意願確認',   count:  8, color: '#0D9488' },
   { stage: '完成續約',   count:  7, color: '#1E3480' },
+]
+
+export const MOCK_CONVERSION_LOSS_REASONS = [
+  { label: '費用考量', pct: 40 },
+  { label: '需求改變', pct: 35 },
+  { label: '更換律所', pct: 25 },
+]
+
+export const MOCK_APPEAL_LOSS_REASONS = [
+  { label: '情況改變', pct: 45 },
+  { label: '費用考量', pct: 30 },
+  { label: '期待不符', pct: 25 },
+]
+
+export const MOCK_RETAINER_LOSS_REASONS = [
+  { label: '費用考量', pct: 40 },
+  { label: '需求改變', pct: 35 },
+  { label: '更換律所', pct: 25 },
 ]
 
 export const MOCK_CYCLE_DAYS_BY_TYPE = [

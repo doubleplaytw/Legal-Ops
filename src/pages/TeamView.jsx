@@ -1,28 +1,24 @@
 import { useState, useMemo } from 'react'
 import HScrollArea from '../components/ui/HScrollArea'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
-import { MOCK_LAWYERS } from '../constants/mockData'
+import { MOCK_LAWYERS, MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
 
 const SORT_OPTIONS = [
   { value: 'id',       label: '字母 A → L' },
   { value: 'active',   label: '進行中案件（多→少）' },
-  { value: 'deadline', label: '到期件數（多→少）' },
-  { value: 'billing',  label: '本季計費時數（多→少）' },
+  { value: 'billing',  label: '本月計費時數（多→少）' },
   { value: 'newcases',    label: '本月新收案件（多→少）' },
-  { value: 'cycle',       label: '平均週期（長→短）' },
-  { value: 'receivable',  label: '本季收款目標（多→少）' },
-  { value: 'collection',  label: '本季收款率（低→高）' },
+  { value: 'receivable',  label: '本月收款目標（多→少）' },
+  { value: 'collection',  label: '本月收款率（低→高）' },
 ]
 
 function sortLawyers(lawyers, key) {
   return [...lawyers].sort((a, b) => {
     if (key === 'id')       return a.id.localeCompare(b.id)
     if (key === 'active')   return b.activeCases - a.activeCases
-    if (key === 'deadline') return b.upcomingDeadlines - a.upcomingDeadlines
     if (key === 'billing')  return b.billingHoursQ - a.billingHoursQ
     if (key === 'newcases')   return b.newCasesThisMonth - a.newCasesThisMonth
-    if (key === 'cycle')      return b.avgCycleDays - a.avgCycleDays
     if (key === 'receivable') return b.receivableAmount - a.receivableAmount
     if (key === 'collection') {
       const rateA = a.receivableAmount > 0 ? a.receivedAmount / a.receivableAmount : 0
@@ -56,28 +52,49 @@ function MiniDonut({ cases, capacity }) {
   )
 }
 
-function CaseTypeBars({ caseTypes }) {
-  const active = caseTypes.filter((c) => c.count > 0)
+function CaseTypeStages({ lawyerId }) {
+  const cases = MOCK_CASES.filter(c => c.lawyer === lawyerId && c.status !== 'closed')
+  const byType = {}
+  cases.forEach(c => {
+    if (!byType[c.type]) byType[c.type] = {}
+    byType[c.type][c.status] = (byType[c.type][c.status] || 0) + 1
+  })
+  const types = Object.entries(byType)
+  if (types.length === 0) return <p className="text-xs text-gray-400">無進行中案件</p>
   return (
     <div className="flex flex-col">
       <div className="flex items-center pb-1.5 mb-1 border-b border-gray-50">
         <span className="flex-1 text-xs text-gray-300">類型</span>
         <span className="text-xs text-gray-300 w-6 text-center">件</span>
-        <span className="text-xs text-gray-300 w-14 text-right">使用期間</span>
-        <span className="text-xs text-gray-300 w-14 text-right">結案週期</span>
       </div>
-      {active.map((c) => {
-        const colorIndex = CASE_TYPES.indexOf(c.type)
-        const color = CASE_TYPE_COLORS[colorIndex >= 0 ? colorIndex : 0]
+      {types.map(([type, stages]) => {
+        const total = Object.values(stages).reduce((s, n) => s + n, 0)
+        const colorIndex = CASE_TYPES.indexOf(type)
+        const dotColor = CASE_TYPE_COLORS[colorIndex >= 0 ? colorIndex : 0]
         return (
-          <div key={c.type} className="flex items-center py-1.5 border-b border-gray-50 last:border-0">
-            <div className="flex-1 flex items-center gap-1.5 min-w-0">
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
-              <span className="text-xs text-gray-600 truncate">{c.type}</span>
+          <div key={type} className="py-1.5 border-b border-gray-50 last:border-0">
+            <div className="flex items-center mb-1">
+              <div className="flex-1 flex items-center gap-1.5 min-w-0">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
+                <span className="text-xs text-gray-600 truncate">{type}</span>
+              </div>
+              <span className="text-xs font-semibold text-[#1E3480] w-6 text-center">{total}</span>
             </div>
-            <span className="text-xs font-semibold text-[#1E3480] w-6 text-center">{c.count}</span>
-            <span className="text-xs text-gray-400 w-14 text-right">{c.avgElapsedDays} 天</span>
-            <span className="text-xs font-semibold text-gray-600 w-14 text-right">{c.avgDays} 天</span>
+            <div className="flex flex-wrap gap-1 pl-3">
+              {Object.entries(stages).map(([status, count]) => {
+                const info = CASE_STATUSES.find(s => s.key === status)
+                if (!info) return null
+                return (
+                  <span
+                    key={status}
+                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+                    style={{ backgroundColor: info.bg, color: info.color }}
+                  >
+                    {info.label} ×{count}
+                  </span>
+                )
+              })}
+            </div>
           </div>
         )
       })}
@@ -86,18 +103,6 @@ function CaseTypeBars({ caseTypes }) {
 }
 
 
-function OverdueBadges({ overdue }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${overdue.expired > 0 ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-300'}`}>
-        已逾期 {overdue.expired}
-      </span>
-      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${overdue.warning > 0 ? 'bg-orange-50 text-orange-500' : 'bg-gray-50 text-gray-300'}`}>
-        即將逾期 {overdue.warning}
-      </span>
-    </div>
-  )
-}
 
 function SectionLabel({ children }) {
   return <p className="text-xs font-bold text-gray-600 uppercase tracking-widest mb-2">{children}</p>
@@ -112,7 +117,7 @@ function QuarterKpiBlock({ sectionLabel, targetDisplay, currentDisplay, lastQVal
       <SectionLabel>{sectionLabel}</SectionLabel>
       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">當季目標</p>
+          <p className="text-xs text-gray-400 mb-0.5">當月目標</p>
           <p className="text-sm font-bold text-gray-400">{targetDisplay}</p>
         </div>
         <div>
@@ -123,11 +128,11 @@ function QuarterKpiBlock({ sectionLabel, targetDisplay, currentDisplay, lastQVal
           </div>
         </div>
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">本季目前</p>
+          <p className="text-xs text-gray-400 mb-0.5">本月目前</p>
           <p className="text-sm font-bold text-[#1E3480]">{currentDisplay}</p>
         </div>
         <div>
-          <p className="text-xs text-gray-400 mb-0.5">較上季</p>
+          <p className="text-xs text-gray-400 mb-0.5">較上月</p>
           <p className="text-sm font-bold text-gray-600">
             {diffUnit === 'currency'
               ? `${diffPositive ? '+' : '-'} NT$ ${Math.abs(diff).toLocaleString()}`
@@ -176,9 +181,9 @@ function LawyerCard({ lawyer }) {
 
         <div className="h-px bg-gray-100 mb-4" />
 
-        {/* ② 本季計費時數 */}
+        {/* ② 本月計費時數 */}
         <QuarterKpiBlock
-          sectionLabel="本季計費時數"
+          sectionLabel="本月計費時數"
           targetDisplay={`${lawyer.billingHoursQTarget} hr`}
           currentDisplay={`${lawyer.billingHoursQ} hr`}
           currentValue={lawyer.billingHoursQ}
@@ -189,9 +194,9 @@ function LawyerCard({ lawyer }) {
 
         <div className="h-px bg-gray-100 mb-4" />
 
-        {/* ④ 本季財務 */}
+        {/* ④ 本月財務 */}
         <QuarterKpiBlock
-          sectionLabel="本季財務"
+          sectionLabel="本月財務"
           targetDisplay={`NT$ ${lawyer.receivableAmount.toLocaleString()}`}
           currentDisplay={`NT$ ${lawyer.receivedAmount.toLocaleString()}`}
           currentValue={lawyer.receivedAmount}
@@ -204,8 +209,8 @@ function LawyerCard({ lawyer }) {
 
         {/* ⑤ 案件分布 */}
         <div>
-          <SectionLabel>進行案件明細</SectionLabel>
-          <CaseTypeBars caseTypes={lawyer.caseTypes} />
+          <SectionLabel>案件進行明細</SectionLabel>
+          <CaseTypeStages lawyerId={lawyer.id} />
         </div>
 
       </div>
@@ -260,9 +265,6 @@ export default function TeamView() {
           僅顯示有到期案件
         </button>
 
-        <span className="text-xs text-gray-400 ml-auto">
-          顯示 {displayed.length} / {MOCK_LAWYERS.length} 位律師
-        </span>
       </div>
 
       {/* Lawyer columns */}
