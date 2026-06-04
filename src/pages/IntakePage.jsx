@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { CASE_TYPES } from '../constants/caseTypes'
 
-const BRANCHES  = ['台北總所', '台中分所', '高雄分所', '線上諮詢']
-const REFERRALS = ['親友介紹', 'Google 搜尋', '社群媒體', '律所官網', '其他']
+const BRANCHES      = ['台北總所', '台中分所', '高雄分所', '線上諮詢']
+const REFERRALS     = ['網路社群', '報章雜誌', '其他']
+const CONSULT_TYPES = ['法律諮詢', '課程講師', '公關活動', '其他業務']
 
 const INPUT_CLS = 'flex-1 text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent placeholder:text-gray-300 transition'
 const SELECT_CLS = 'flex-1 text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent transition appearance-none cursor-pointer'
@@ -112,7 +112,7 @@ export default function IntakePage() {
                       <select className={SELECT_CLS} value={form.consultType}
                         onChange={e => set('consultType', e.target.value)}>
                         <option value="">請選擇想要諮詢的項目</option>
-                        {CASE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                        {CONSULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                       <svg className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                     </div>
@@ -182,7 +182,7 @@ export default function IntakePage() {
                     <div className="flex-1 relative">
                       <select className={SELECT_CLS} value={form.referral}
                         onChange={e => set('referral', e.target.value)}>
-                        <option value="">如何得知恩典</option>
+                        <option value="">如何得知我們</option>
                         {REFERRALS.map(r => <option key={r} value={r}>{r}</option>)}
                       </select>
                       <svg className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
