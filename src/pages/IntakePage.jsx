@@ -87,8 +87,8 @@ export default function IntakePage() {
         <div className="max-w-lg mx-auto flex items-center gap-3">
           <div className="w-1 h-6 bg-[#E8A020] rounded-full shrink-0" />
           <div>
-            <p className="text-white font-bold tracking-widest text-sm">恩典法律事務所</p>
-            <p className="text-white/50 text-[11px] tracking-wider">Grace Law Firm</p>
+            <p className="text-white font-bold tracking-widest text-sm">Demo Law Firm</p>
+            <p className="text-white/50 text-[11px] tracking-wider">Demo Law Firm</p>
           </div>
         </div>
       </header>
@@ -218,7 +218,7 @@ export default function IntakePage() {
             </form>
           )}
 
-          <p className="text-center text-xs text-gray-400 mt-5">© 恩典法律事務所 Grace Law Firm</p>
+          <p className="text-center text-xs text-gray-400 mt-5">© Demo Law Firm Demo Law Firm</p>
         </div>
       </main>
 
