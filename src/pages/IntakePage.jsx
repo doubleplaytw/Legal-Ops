@@ -5,7 +5,7 @@ const REFERRALS     = ['網路社群', '報章雜誌', '其他']
 const CONSULT_TYPES = ['法律諮詢', '課程講師', '公關活動', '其他業務']
 
 const INPUT_CLS = 'flex-1 text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent placeholder:text-gray-300 transition'
-const SELECT_CLS = 'flex-1 text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent transition appearance-none cursor-pointer'
+const SELECT_CLS = 'w-full text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent transition appearance-none cursor-pointer'
 
 function Row({ label, required, error, children }) {
   return (
@@ -49,7 +49,7 @@ export default function IntakePage() {
   const [form, setForm] = useState({
     consultType: '', salutation: '先生', name: '',
     phone: '', mobile: '', email: '',
-    branch: '', referral: '', description: '',
+    branch: [], referral: '', description: '',
   })
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState('idle')
@@ -66,7 +66,7 @@ export default function IntakePage() {
     if (!form.mobile.trim())     e.mobile      = '請輸入行動電話'
     else if (!/^09\d{8}$/.test(form.mobile.replace(/\s/g, '')))
                                  e.mobile      = '請輸入有效手機號碼'
-    if (!form.branch)            e.branch      = '請選擇分所'
+    if (!form.branch.length)      e.branch      = '請選擇分所'
     return e
   }
 
@@ -165,13 +165,24 @@ export default function IntakePage() {
                 {/* 分所選填 */}
                 <div className="px-5 py-4">
                   <Row label="分所選填" required error={errors.branch}>
-                    <div className="flex-1 relative">
-                      <select className={SELECT_CLS} value={form.branch}
-                        onChange={e => set('branch', e.target.value)}>
-                        <option value="">請選擇分所</option>
-                        {BRANCHES.map(b => <option key={b} value={b}>{b}</option>)}
-                      </select>
-                      <svg className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                    <div className="flex-1 flex flex-wrap gap-x-5 gap-y-2 pt-1">
+                      {BRANCHES.map(b => (
+                        <label key={b} className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            value={b}
+                            checked={form.branch.includes(b)}
+                            onChange={e => {
+                              const checked = e.target.checked
+                              set('branch', checked
+                                ? [...form.branch, b]
+                                : form.branch.filter(x => x !== b))
+                            }}
+                            className="accent-[#1E3480] w-3.5 h-3.5"
+                          />
+                          <span className="text-sm text-gray-600">{b}</span>
+                        </label>
+                      ))}
                     </div>
                   </Row>
                 </div>
@@ -190,13 +201,13 @@ export default function IntakePage() {
                   </Row>
                 </div>
 
-                {/* 需求說明 */}
+                {/* 其他備註說明 */}
                 <div className="px-5 py-4">
-                  <Row label="需求說明" error={errors.description}>
+                  <Row label="其他備註說明" error={errors.description}>
                     <textarea
                       className="flex-1 text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent placeholder:text-gray-300 resize-none transition"
                       rows={4}
-                      placeholder={`請幫我敘述您想諮詢的內容，並告留下方便聯絡的時間，我們會有專人於營業時間依序與您聯繫，謝謝您的耐心等候。\n提醒您，本所致電號碼為070開頭，請放心接聽。如有立即需求，歡迎您於營業時間（週一至週五）來電洽詢。`}
+                      placeholder=""
                       value={form.description}
                       onChange={e => set('description', e.target.value)}
                     />
