@@ -31,6 +31,15 @@
  * 【文件連結】案件相關 Google Drive 連結
  *   A 連結ID  B 案件編號  C 文件名稱  D URL
  *
+ * 【客戶主檔】一客戶一列，建檔後人工維護；Landing page 表單投件後由律師補全
+ *   A 客戶編號   B 姓名     C 稱謂     D 客戶類型(個人/公司)
+ *   E 統一編號   F 身分證字號 G 行動電話  H 聯絡電話
+ *   I 電子信箱   J 所屬分所  K 來源管道  L 初始諮詢項目
+ *   M 客戶狀態(待諮詢/諮詢中/委任中/前客戶/流失)
+ *   N 負責律師   O 委任合約狀態(未簽/已簽/終止)
+ *   P 利衝查詢狀態(未查/無衝突/有衝突)  Q 利衝查詢日期  R 利衝備註
+ *   S 關聯案件編號(逗號分隔)  T 初始需求說明  U 內部備註  V 建檔日期
+ *
  * ─────────────────────────────────────────────────────────────────────────
  * 切換正式資料時：僅替換此檔案的實作，元件層不需改動。
  */
@@ -188,6 +197,46 @@ export async function fetchDriveLinks() {
     map[caseNo].push({ id: Number(id), name, url })
   })
   return map
+}
+
+// ── 客戶主檔 ──────────────────────────────────────────────────────────────
+
+/**
+ * 回傳格式與 MOCK_CLIENT_MASTER 一致
+ */
+export async function fetchClientMaster() {
+  const rows = await fetchRange('客戶主檔!A2:V')
+  return rows.map(([
+    clientNo, name, salutation, clientType, taxId, nationalId,
+    mobile, phone, email, branch, referral, consultType,
+    clientStatus, assignedLawyer, contractStatus,
+    conflictCheck, conflictCheckDate, conflictNote,
+    linkedCaseIdsRaw, initialNote, internalNote, createdAt,
+  ]) => ({
+    id: clientNo,
+    clientNo,
+    name,
+    salutation: salutation ?? '',
+    clientType: clientType ?? 'individual',
+    taxId: taxId ?? '',
+    nationalId: nationalId ?? '',
+    mobile: mobile ?? '',
+    phone: phone ?? '',
+    email: email ?? '',
+    branch: branch ?? '',
+    referral: referral ?? '',
+    consultType: consultType ?? '',
+    clientStatus: clientStatus ?? 'pending',
+    assignedLawyer: assignedLawyer ?? '',
+    contractStatus: contractStatus ?? 'unsigned',
+    conflictCheck: conflictCheck ?? 'unchecked',
+    conflictCheckDate: conflictCheckDate ?? '',
+    conflictNote: conflictNote ?? '',
+    linkedCaseIds: linkedCaseIdsRaw ? linkedCaseIdsRaw.split(',').map(s => s.trim()).filter(Boolean) : [],
+    initialNote: initialNote ?? '',
+    internalNote: internalNote ?? '',
+    createdAt: createdAt ?? '',
+  }))
 }
 
 // ── 諮詢預約表單寫入（透過 Apps Script）────────────────────────────────────

@@ -75,6 +75,12 @@ export default function IntakePage() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setStatus('submitting')
+    // Demo：寫入 localStorage 供客戶主檔讀取；正式串接 Apps Script 後移除
+    try {
+      const queue = JSON.parse(localStorage.getItem('intake_queue') || '[]')
+      queue.unshift({ ...form, submittedAt: new Date().toISOString().split('T')[0] })
+      localStorage.setItem('intake_queue', JSON.stringify(queue))
+    } catch (_) {}
     // TODO: 串接 Apps Script（見 docs/apps-script.js）
     setTimeout(() => setStatus('success'), 800)
   }

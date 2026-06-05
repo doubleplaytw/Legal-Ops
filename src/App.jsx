@@ -4,19 +4,21 @@ import Dashboard from './pages/Dashboard'
 import TeamView from './pages/TeamView'
 import CaseView from './pages/CaseView'
 import ClientSuccessView from './pages/ClientSuccessView'
+import ClientMasterView from './pages/ClientMasterView'
 import StatutesView from './pages/StatutesView'
 import JudgmentView from './pages/JudgmentView'
 import './App.css'
 
-function renderPage(page, { judgmentLinks, onLink }) {
+function renderPage(page, { judgmentLinks, onJudgmentLink, statuteLinks, onStatuteLink }) {
   switch (page) {
-    case 'dashboard': return <Dashboard />
-    case 'team':      return <TeamView />
-    case 'cases':     return <CaseView />
-    case 'clients':   return <ClientSuccessView judgmentLinks={judgmentLinks} />
-    case 'statutes':  return <StatutesView />
-    case 'judgments': return <JudgmentView links={judgmentLinks} onLink={onLink} />
-    default:          return <Dashboard />
+    case 'dashboard':    return <Dashboard />
+    case 'team':         return <TeamView />
+    case 'cases':        return <CaseView />
+    case 'clientmaster': return <ClientMasterView />
+    case 'clients':      return <ClientSuccessView judgmentLinks={judgmentLinks} statuteLinks={statuteLinks} />
+    case 'statutes':     return <StatutesView links={statuteLinks} onLink={onStatuteLink} />
+    case 'judgments':    return <JudgmentView links={judgmentLinks} onLink={onJudgmentLink} />
+    default:             return <Dashboard />
   }
 }
 
@@ -53,6 +55,16 @@ const NAV_ITEMS = [
     ),
   },
   {
+    key: 'clientmaster',
+    label: 'Clients',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+  },
+  {
     key: 'clients',
     label: 'Customers',
     icon: (
@@ -84,14 +96,19 @@ const NAV_ITEMS = [
 function App() {
   const [activePage, setActivePage] = useState('dashboard')
   const [judgmentLinks, setJudgmentLinks] = useState([
-    { judgmentId: 'JUD-005', clientId: 'ch-3' }, // ○○物流（行政訴訟）← 最高行政法院
-    { judgmentId: 'JUD-002', clientId: 'ch-2' }, // 王○○（借貸契約）← 高等法院借貸
-    { judgmentId: 'JUD-004', clientId: 'ch-1' }, // ○○科技（智慧財產）← 智慧財產法院
-    { judgmentId: 'JUD-001', clientId: 'ch-1' }, // ○○科技 第二筆
+    { judgmentId: 'JUD-005', clientId: 'ch-3' },
+    { judgmentId: 'JUD-002', clientId: 'ch-2' },
+    { judgmentId: 'JUD-004', clientId: 'ch-1' },
+    { judgmentId: 'JUD-001', clientId: 'ch-1' },
   ])
+  const [statuteLinks, setStatuteLinks] = useState([])
 
-  function handleLink(judgmentId, clientId) {
+  function handleJudgmentLink(judgmentId, clientId) {
     setJudgmentLinks(prev => [...prev, { judgmentId, clientId }])
+  }
+
+  function handleStatuteLink(statuteId, clientId) {
+    setStatuteLinks(prev => [...prev, { statuteId, clientId }])
   }
 
   return (
@@ -115,7 +132,7 @@ function App() {
 
         {/* Main content — extra bottom padding on mobile for bottom nav */}
         <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-          {renderPage(activePage, { judgmentLinks, onLink: handleLink })}
+          {renderPage(activePage, { judgmentLinks, onJudgmentLink: handleJudgmentLink, statuteLinks, onStatuteLink: handleStatuteLink })}
         </main>
       </div>
 

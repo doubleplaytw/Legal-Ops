@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { MOCK_STATUTES, STATUTE_TYPES } from '../constants/mockData'
+import { MOCK_STATUTES, STATUTE_TYPES, MOCK_CLIENT_HEALTH } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
 
 function CaseTypeBadge({ type }) {
@@ -31,7 +31,106 @@ function TypeBadge({ type }) {
   )
 }
 
-function StatuteRow({ s }) {
+// ── 關聯 Modal ─────────────────────────────────────────────────────────────
+
+function StatuteLinkModal({ statute, links, onClose, onConfirm }) {
+  const [selectedId, setSelectedId] = useState(null)
+
+  const linkedClientIds = links
+    .filter(l => l.statuteId === statute.id)
+    .map(l => l.clientId)
+
+  const linked    = MOCK_CLIENT_HEALTH.filter(c =>  linkedClientIds.includes(c.id))
+  const available = MOCK_CLIENT_HEALTH.filter(c => !linkedClientIds.includes(c.id))
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-[480px] max-h-[560px] flex flex-col overflow-hidden">
+
+        <div className="px-6 py-5 border-b border-gray-100 shrink-0">
+          <h3 className="text-base font-bold text-[#1E3480]">關聯至案件</h3>
+          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{statute.name} · {statute.display}</p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3">
+          {linked.length > 0 && (
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">已關聯案件</p>
+              {linked.map(c => (
+                <div key={c.id} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-50 mb-1.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1E3480] shrink-0">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-500 truncate">{c.parties}</p>
+                    <p className="text-xs text-gray-400 truncate">{c.caseNo} · {c.caseType}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {available.length > 0 ? (
+            <div>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">選擇案件</p>
+              {available.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setSelectedId(c.id === selectedId ? null : c.id)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left mb-1.5 border transition-all ${
+                    selectedId === c.id
+                      ? 'border-[#1E3480] bg-[#1E3480]/5'
+                      : 'border-gray-100 hover:border-gray-200 bg-white'
+                  }`}
+                >
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                    selectedId === c.id ? 'bg-[#1E3480] border-[#1E3480]' : 'border-gray-300'
+                  }`}>
+                    {selectedId === c.id && (
+                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                        <polyline points="2 6 5 9 10 3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-700 truncate">{c.parties}</p>
+                    <p className="text-xs text-gray-400 truncate">{c.caseNo} · {c.caseType}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400 text-center py-6">已關聯至所有追蹤案件</p>
+          )}
+        </div>
+
+        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2 shrink-0">
+          <button
+            onClick={onClose}
+            className="text-sm px-4 py-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+          >
+            取消
+          </button>
+          <button
+            onClick={() => { if (selectedId) { onConfirm(statute.id, selectedId); onClose() } }}
+            disabled={!selectedId}
+            className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all ${
+              selectedId
+                ? 'bg-[#1E3480] text-white hover:bg-[#1E3480]/90'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            確認關聯
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── 表格列 ─────────────────────────────────────────────────────────────────
+
+function StatuteRow({ s, linkedCount, onLinkClick }) {
   return (
     <tr className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
       <td className="px-4 py-3.5 align-top">
@@ -57,14 +156,29 @@ function StatuteRow({ s }) {
           ))}
         </div>
       </td>
+      <td className="px-4 py-3.5 align-middle text-right">
+        <button
+          onClick={onLinkClick}
+          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all whitespace-nowrap ${
+            linkedCount > 0
+              ? 'border-[#1E3480]/30 bg-[#1E3480]/5 text-[#1E3480]'
+              : 'border-gray-200 text-gray-400 hover:border-[#1E3480] hover:text-[#1E3480]'
+          }`}
+        >
+          {linkedCount > 0 ? `已關聯 ${linkedCount}` : '關聯案件'}
+        </button>
+      </td>
     </tr>
   )
 }
 
-export default function StatutesView() {
+// ── 主頁面 ─────────────────────────────────────────────────────────────────
+
+export default function StatutesView({ links = [], onLink }) {
   const [filterType, setFilterType] = useState('all')
   const [filterCaseType, setFilterCaseType] = useState('all')
   const [search, setSearch] = useState('')
+  const [modalStatute, setModalStatute] = useState(null)
 
   const filtered = useMemo(() => {
     return MOCK_STATUTES.filter((s) => {
@@ -87,6 +201,10 @@ export default function StatutesView() {
     STATUTE_TYPES.forEach((t) => { map[t] = MOCK_STATUTES.filter((s) => s.type === t).length })
     return map
   }, [])
+
+  function linkedCount(statuteId) {
+    return links.filter(l => l.statuteId === statuteId).length
+  }
 
   return (
     <div className="px-8 py-8 flex flex-col gap-6 h-full">
@@ -174,21 +292,39 @@ export default function StatutesView() {
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">說明</th>
               <th className="px-4 py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-wider w-28">時效期間</th>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-44">適用案件類型</th>
+              <th className="px-4 py-3 text-right text-xs font-bold text-gray-400 uppercase tracking-wider w-24">關聯</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-16 text-center text-sm text-gray-300">
+                <td colSpan={6} className="px-4 py-16 text-center text-sm text-gray-300">
                   無符合條件的資料
                 </td>
               </tr>
             ) : (
-              filtered.map((s) => <StatuteRow key={s.id} s={s} />)
+              filtered.map((s) => (
+                <StatuteRow
+                  key={s.id}
+                  s={s}
+                  linkedCount={linkedCount(s.id)}
+                  onLinkClick={() => setModalStatute(s)}
+                />
+              ))
             )}
           </tbody>
         </table>
       </div>
+
+      {/* Link Modal */}
+      {modalStatute && (
+        <StatuteLinkModal
+          statute={modalStatute}
+          links={links}
+          onClose={() => setModalStatute(null)}
+          onConfirm={(statuteId, clientId) => { onLink?.(statuteId, clientId) }}
+        />
+      )}
 
     </div>
   )

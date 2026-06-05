@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MOCK_CLIENT_HEALTH, MOCK_CASES, MOCK_JUDGMENTS, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
+import { MOCK_CLIENT_HEALTH, MOCK_CASES, MOCK_JUDGMENTS, MOCK_STATUTES, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
 import { useDemoMode } from '../hooks/useDemoMode'
 
 const TODAY = new Date()
@@ -168,7 +168,7 @@ function ClientListItem({ client, selected, onClick }) {
   )
 }
 
-function DetailPanel({ client, onBack, isDemoMode, linkedJudgments }) {
+function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatutes = [] }) {
   const days = daysSince(client.lastContactDate)
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -219,7 +219,7 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments }) {
             <div className="mb-4">
               <SectionLabel>相關文件</SectionLabel>
             </div>
-            {client.driveLinks.length === 0 && linkedJudgments.length === 0 ? (
+            {client.driveLinks.length === 0 && linkedJudgments.length === 0 && linkedStatutes.length === 0 ? (
               <p className="text-sm text-gray-400">尚未連結文件</p>
             ) : (
               <div className="flex flex-col gap-2">
@@ -242,6 +242,15 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments }) {
                     <span className="text-xs text-gray-400">· 參考判決</span>
                   </a>
                 ))}
+                {linkedStatutes.map((s) => (
+                  <div key={s.id} className="flex items-center gap-2.5 text-sm text-[#1E3480]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-emerald-500">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span>{s.name}</span>
+                    <span className="text-xs text-gray-400">· {s.display} · {s.law}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -260,7 +269,7 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments }) {
   )
 }
 
-export default function ClientSuccessView({ judgmentLinks = [] }) {
+export default function ClientSuccessView({ judgmentLinks = [], statuteLinks = [] }) {
   const isDemoMode = useDemoMode()
   const [sortKey, setSortKey] = useState('urgency')
   const [selected, setSelected] = useState(null)
@@ -270,6 +279,13 @@ export default function ClientSuccessView({ judgmentLinks = [] }) {
       .filter(l => l.clientId === clientId)
       .map(l => l.judgmentId)
     return MOCK_JUDGMENTS.filter(j => linkedIds.includes(j.id))
+  }
+
+  function getLinkedStatutes(clientId) {
+    const linkedIds = statuteLinks
+      .filter(l => l.clientId === clientId)
+      .map(l => l.statuteId)
+    return MOCK_STATUTES.filter(s => linkedIds.includes(s.id))
   }
 
   const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) => {
@@ -283,7 +299,7 @@ export default function ClientSuccessView({ judgmentLinks = [] }) {
   return (
     <div className="flex flex-col md:flex-row h-full">
 
-      <div className={`md:w-[260px] lg:w-[360px] md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
+      <div className={`md:w-2/5 md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
         <div className="px-5 py-5 border-b border-gray-100">
           <p className="text-sm font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
           <h1 className="text-2xl font-bold text-[#1E3480]">客戶健康追蹤</h1>
@@ -319,9 +335,9 @@ export default function ClientSuccessView({ judgmentLinks = [] }) {
         </div>
       </div>
 
-      <div className={`flex-1 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
+      <div className={`md:w-3/5 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
-          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} linkedJudgments={getLinkedJudgments(selected.id)} />
+          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} linkedJudgments={getLinkedJudgments(selected.id)} linkedStatutes={getLinkedStatutes(selected.id)} />
           : null
         }
       </div>
