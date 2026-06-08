@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { MOCK_CLIENT_HEALTH, MOCK_CASES, MOCK_JUDGMENTS, MOCK_STATUTES, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
 import { useDemoMode } from '../hooks/useDemoMode'
 
@@ -55,6 +55,15 @@ function getUrgency(client) {
 }
 
 const URGENCY_SCORE = { critical: 0, warning: 1, normal: 2 }
+
+const SELECT_CLS = 'w-full text-xs border border-gray-100 rounded-lg bg-gray-50 py-1.5 px-2 text-gray-600 focus:outline-none focus:border-[#1E3480] appearance-none cursor-pointer transition'
+
+const URGENCY_FILTER_OPTIONS = [
+  { value: 'all',      label: '全部急迫性' },
+  { value: 'critical', label: '緊急' },
+  { value: 'warning',  label: '待處理' },
+  { value: 'normal',   label: '正常' },
+]
 
 function SectionLabel({ children }) {
   return <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">{children}</p>
@@ -269,10 +278,17 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatut
   )
 }
 
+const INIT_FILTERS = { urgency: 'all', lawyer: 'all', caseType: 'all', sort: 'urgency' }
+
 export default function ClientSuccessView({ judgmentLinks = [], statuteLinks = [] }) {
   const isDemoMode = useDemoMode()
-  const [sortKey, setSortKey] = useState('urgency')
   const [selected, setSelected] = useState(null)
+  const [search, setSearch] = useState('')
+  const [filters, setFilters] = useState(INIT_FILTERS)
+
+  function setFilter(key, val) {
+    setFilters(f => ({ ...f, [key]: val }))
+  }
 
   function getLinkedJudgments(clientId) {
     const linkedIds = judgmentLinks
@@ -288,50 +304,123 @@ export default function ClientSuccessView({ judgmentLinks = [], statuteLinks = [
     return MOCK_STATUTES.filter(s => linkedIds.includes(s.id))
   }
 
-  const sorted = [...MOCK_CLIENT_HEALTH].sort((a, b) => {
-    if (sortKey === 'urgency') {
-      const diff = URGENCY_SCORE[getUrgency(a)] - URGENCY_SCORE[getUrgency(b)]
-      if (diff !== 0) return diff
+  const uniqueLawyers = useMemo(() =>
+    [...new Set(MOCK_CLIENT_HEALTH.map(c => c.lawyer).filter(Boolean))].sort()
+  , [])
+
+  const uniqueCaseTypes = useMemo(() =>
+    [...new Set(MOCK_CLIENT_HEALTH.map(c => c.caseType).filter(Boolean))].sort()
+  , [])
+
+  const displayed = useMemo(() => {
+    let list = [...MOCK_CLIENT_HEALTH]
+    if (filters.urgency !== 'all') list = list.filter(c => getUrgency(c) === filters.urgency)
+    if (filters.lawyer !== 'all')   list = list.filter(c => c.lawyer === filters.lawyer)
+    if (filters.caseType !== 'all') list = list.filter(c => c.caseType === filters.caseType)
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      list = list.filter(c =>
+        c.parties.toLowerCase().includes(q) ||
+        c.caseNo.toLowerCase().includes(q) ||
+        c.lawyer.toLowerCase().includes(q)
+      )
     }
-    return daysSince(b.lastContactDate) - daysSince(a.lastContactDate)
-  })
+    list.sort((a, b) => {
+      if (filters.sort === 'urgency') {
+        const diff = URGENCY_SCORE[getUrgency(a)] - URGENCY_SCORE[getUrgency(b)]
+        if (diff !== 0) return diff
+      }
+      return daysSince(b.lastContactDate) - daysSince(a.lastContactDate)
+    })
+    return list
+  }, [filters, search])
+
+  const activeFilterCount = Object.entries(filters).filter(([k, v]) => k !== 'sort' && v !== 'all').length
 
   return (
     <div className="flex flex-col md:flex-row h-full">
 
       <div className={`md:w-2/5 md:shrink-0 bg-white md:border-r border-gray-100 flex flex-col ${selected ? 'hidden md:flex' : 'flex flex-1 md:flex-none'}`}>
+
+        {/* 標題 */}
         <div className="px-5 py-5 border-b border-gray-100">
           <p className="text-sm font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Customer Success</p>
           <h1 className="text-2xl font-bold text-[#1E3480]">客戶健康追蹤</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{sorted.length} 位追蹤中客戶</p>
         </div>
-        <div className="px-5 py-3 flex gap-1.5 shrink-0">
-          {[
-            { key: 'urgency', label: '急迫性' },
-            { key: 'contact', label: '最後接觸' },
-          ].map((o) => (
-            <button
-              key={o.key}
-              onClick={() => setSortKey(o.key)}
-              className={`text-sm px-3 py-1 rounded-lg border transition-all ${
-                sortKey === o.key
-                  ? 'bg-[#1E3480] border-[#1E3480] text-white font-semibold'
-                  : 'border-gray-200 text-gray-500 hover:border-[#1E3480] hover:text-[#1E3480]'
-              }`}
-            >
-              {o.label}
-            </button>
-          ))}
-        </div>
-        <div className="overflow-y-auto flex-1">
-          {sorted.map((c) => (
-            <ClientListItem
-              key={c.id}
-              client={c}
-              selected={selected?.id === c.id}
-              onClick={() => setSelected(c)}
+
+        {/* 搜尋 */}
+        <div className="px-4 pt-3 pb-2">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              type="text"
+              placeholder="搜尋當事人、案號、律師…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-8 pr-3 py-2 text-sm bg-gray-50 border border-gray-100 rounded-lg focus:outline-none focus:border-[#1E3480] placeholder:text-gray-300 transition"
             />
-          ))}
+          </div>
+        </div>
+
+        {/* 四維篩選 */}
+        <div className="px-4 pb-3 grid grid-cols-2 gap-1.5">
+          <div className="relative">
+            <select value={filters.urgency} onChange={e => setFilter('urgency', e.target.value)} className={SELECT_CLS}>
+              {URGENCY_FILTER_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+
+          <div className="relative">
+            <select value={filters.lawyer} onChange={e => setFilter('lawyer', e.target.value)} className={SELECT_CLS}>
+              <option value="all">全部律師</option>
+              {uniqueLawyers.map(l => <option key={l} value={l}>{l} 律師</option>)}
+            </select>
+            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+
+          <div className="relative">
+            <select value={filters.caseType} onChange={e => setFilter('caseType', e.target.value)} className={SELECT_CLS}>
+              <option value="all">全部案件類型</option>
+              {uniqueCaseTypes.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+
+          <div className="relative">
+            <select value={filters.sort} onChange={e => setFilter('sort', e.target.value)} className={SELECT_CLS}>
+              <option value="urgency">排序：急迫性</option>
+              <option value="contact">排序：最後接觸</option>
+            </select>
+            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
+        {/* 結果數 */}
+        <div className="px-4 pb-2 flex items-center justify-between">
+          <span className="text-xs text-gray-400">{displayed.length} 筆結果</span>
+          {(activeFilterCount > 0 || search.trim()) && (
+            <button onClick={() => { setFilters(INIT_FILTERS); setSearch('') }} className="text-xs text-[#1E3480] hover:underline">
+              清除篩選
+            </button>
+          )}
+        </div>
+
+        <div className="overflow-y-auto flex-1">
+          {displayed.length === 0 ? (
+            <p className="text-sm text-gray-300 text-center py-12">無符合結果</p>
+          ) : (
+            displayed.map((c) => (
+              <ClientListItem
+                key={c.id}
+                client={c}
+                selected={selected?.id === c.id}
+                onClick={() => setSelected(c)}
+              />
+            ))
+          )}
         </div>
       </div>
 

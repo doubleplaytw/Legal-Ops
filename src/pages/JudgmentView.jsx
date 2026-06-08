@@ -98,11 +98,6 @@ function JudgmentListCard({ j, selected, linkedCount, onClick }) {
     >
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <p className="text-xs font-semibold text-[#1E3480] leading-snug">{j.caseNo}</p>
-        {linkedCount > 0 && (
-          <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full bg-[#1E3480]/10 text-[#1E3480] whitespace-nowrap shrink-0">
-            已關聯 {linkedCount}
-          </span>
-        )}
       </div>
       <p className="text-sm text-gray-700 mb-2">{j.cause}</p>
       <div className="flex items-center gap-2 flex-wrap">
@@ -255,23 +250,6 @@ function DetailPanel({ judgment, links, onOpenModal }) {
             ))}
           </div>
         </div>
-
-        {linkedClients.length > 0 && (
-          <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">已關聯案件</p>
-            <div className="flex flex-col gap-1.5">
-              {linkedClients.map(c => (
-                <div key={c.id} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1E3480]/5">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#1E3480] shrink-0">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                  <span className="text-sm font-semibold text-[#1E3480]">{c.parties}</span>
-                  <span className="text-xs text-gray-400">{c.caseNo}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div className="flex items-center gap-3 pt-2">
           <button

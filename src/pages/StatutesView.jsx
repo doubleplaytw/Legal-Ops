@@ -159,13 +159,13 @@ function StatuteRow({ s, linkedCount, onLinkClick }) {
       <td className="px-4 py-3.5 align-middle text-right">
         <button
           onClick={onLinkClick}
-          className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-all whitespace-nowrap ${
-            linkedCount > 0
-              ? 'border-[#1E3480]/30 bg-[#1E3480]/5 text-[#1E3480]'
-              : 'border-gray-200 text-gray-400 hover:border-[#1E3480] hover:text-[#1E3480]'
-          }`}
+          className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#1E3480] text-white hover:bg-[#1E3480]/90 transition-colors whitespace-nowrap ml-auto"
         >
-          {linkedCount > 0 ? `已關聯 ${linkedCount}` : '關聯案件'}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          關聯至案件
         </button>
       </td>
     </tr>
