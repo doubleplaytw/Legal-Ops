@@ -7,6 +7,7 @@ import ClientSuccessView from './pages/ClientSuccessView'
 import ClientMasterView from './pages/ClientMasterView'
 import StatutesView from './pages/StatutesView'
 import JudgmentView from './pages/JudgmentView'
+import MailroomView from './pages/MailroomView'
 import './App.css'
 
 function renderPage(page, { judgmentLinks, onJudgmentLink, statuteLinks, onStatuteLink }) {
@@ -18,6 +19,7 @@ function renderPage(page, { judgmentLinks, onJudgmentLink, statuteLinks, onStatu
     case 'clients':      return <ClientSuccessView judgmentLinks={judgmentLinks} statuteLinks={statuteLinks} />
     case 'statutes':     return <StatutesView links={statuteLinks} onLink={onStatuteLink} />
     case 'judgments':    return <JudgmentView links={judgmentLinks} onLink={onJudgmentLink} />
+    case 'mailroom':     return <MailroomView />
     default:             return <Dashboard />
   }
 }
@@ -88,6 +90,16 @@ const NAV_ITEMS = [
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'mailroom',
+    label: 'Mail Room',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
       </svg>
     ),
   },

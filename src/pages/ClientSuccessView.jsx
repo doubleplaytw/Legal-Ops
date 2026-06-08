@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { MOCK_CLIENT_HEALTH, MOCK_CASES, MOCK_JUDGMENTS, MOCK_STATUTES, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
+import { MOCK_CLIENT_HEALTH, MOCK_CASES, MOCK_JUDGMENTS, MOCK_STATUTES, MOCK_DOCUMENTS, CASE_STATUSES, DEADLINE_CATEGORIES } from '../constants/mockData'
 import { useDemoMode } from '../hooks/useDemoMode'
 
 const TODAY = new Date()
@@ -177,7 +177,8 @@ function ClientListItem({ client, selected, onClick }) {
   )
 }
 
-function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatutes = [] }) {
+
+function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatutes = [], documents = [] }) {
   const days = daysSince(client.lastContactDate)
   return (
     <div className="flex flex-col h-full overflow-y-auto">
@@ -228,10 +229,11 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatut
             <div className="mb-4">
               <SectionLabel>相關文件</SectionLabel>
             </div>
-            {client.driveLinks.length === 0 && linkedJudgments.length === 0 && linkedStatutes.length === 0 ? (
+            {client.driveLinks.length === 0 && linkedStatutes.length === 0 && documents.length === 0 ? (
               <p className="text-sm text-gray-400">尚未連結文件</p>
             ) : (
               <div className="flex flex-col gap-2">
+                {/* Drive 連結 */}
                 {client.driveLinks.map((doc) => (
                   <a key={doc.id} href={doc.url} target="_blank" rel="noreferrer"
                     className="flex items-center gap-2.5 text-sm text-[#1E3480] hover:underline">
@@ -241,16 +243,7 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatut
                     {doc.name}
                   </a>
                 ))}
-                {linkedJudgments.map((j) => (
-                  <a key={j.id} href={j.url} target="_blank" rel="noreferrer"
-                    className="flex items-center gap-2.5 text-sm text-[#1E3480] hover:underline">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#E8A020]">
-                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <span>{j.caseNo}</span>
-                    <span className="text-xs text-gray-400">· 參考判決</span>
-                  </a>
-                ))}
+                {/* 法定時效 */}
                 {linkedStatutes.map((s) => (
                   <div key={s.id} className="flex items-center gap-2.5 text-sm text-[#1E3480]">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-emerald-500">
@@ -260,11 +253,32 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatut
                     <span className="text-xs text-gray-400">· {s.display} · {s.law}</span>
                   </div>
                 ))}
+                {/* 收發文紀錄 */}
+                {documents.length > 0 && (
+                  <div className="mt-1 pt-2 border-t border-gray-100 flex flex-col gap-1.5">
+                    {documents.map((doc) => {
+                      const days = doc.deadlineDate && doc.deadlineType !== '無' ? daysUntil(doc.deadlineDate) : null
+                      return (
+                        <div key={doc.id} className="flex items-start gap-2.5">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                            className={`shrink-0 mt-0.5 ${doc.direction === '收文' ? 'text-blue-400' : 'text-purple-400'}`}>
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                          </svg>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm text-gray-700">{doc.docType}</span>
+                              <span className="text-xs text-gray-400">{doc.date}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             )}
           </div>
-
-          <div className="h-px bg-gray-100" />
 
           <div>
             <div className="mb-4">
@@ -272,6 +286,29 @@ function DetailPanel({ client, onBack, isDemoMode, linkedJudgments, linkedStatut
             </div>
             <FollowUpList followUps={client.followUps} />
           </div>
+
+          {linkedJudgments.length > 0 && (
+            <>
+              <div className="h-px bg-gray-100" />
+              <div>
+                <div className="mb-4">
+                  <SectionLabel>參考文獻</SectionLabel>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {linkedJudgments.map((j) => (
+                    <a key={j.id} href={j.url} target="_blank" rel="noreferrer"
+                      className="flex items-center gap-2.5 text-sm text-[#1E3480] hover:underline">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-[#E8A020]">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                      </svg>
+                      <span>{j.caseNo}</span>
+                      <span className="text-xs text-gray-400">· 參考判決</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
@@ -426,7 +463,7 @@ export default function ClientSuccessView({ judgmentLinks = [], statuteLinks = [
 
       <div className={`md:w-3/5 min-w-0 overflow-hidden bg-white ${selected ? 'flex flex-col' : 'hidden md:flex'}`}>
         {selected
-          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} linkedJudgments={getLinkedJudgments(selected.id)} linkedStatutes={getLinkedStatutes(selected.id)} />
+          ? <DetailPanel client={selected} onBack={() => setSelected(null)} isDemoMode={isDemoMode} linkedJudgments={getLinkedJudgments(selected.id)} linkedStatutes={getLinkedStatutes(selected.id)} documents={MOCK_DOCUMENTS.filter(d => d.caseNo === selected.caseNo)} />
           : null
         }
       </div>

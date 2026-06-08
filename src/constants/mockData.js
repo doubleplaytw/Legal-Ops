@@ -865,6 +865,74 @@ export const MOCK_STATUTES = [
   },
 ]
 
+// ── 收發文 ──────────────────────────────────────────────────────────────────
+// 正式來源：Google Sheets「收發文」工作表
+// deadlineDate 為 null 表示無時效；daysLeft 在頁面層動態計算，不存此處
+
+export const MOCK_DOCUMENTS = [
+  // ── C-2026-048 ○○科技 軟體授權合約爭議（B 律師）────────────────────────
+  { id: 'DOC-2026-001', direction: '收文', caseNo: 'C-2026-048', docType: '法院送達－開庭通知',  docRef: '114年度智字第56號',      date: '2026-05-10', summary: '第一次言詞辯論期日：2026-06-10 09:30', deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'B', note: '' },
+  { id: 'DOC-2026-002', direction: '發文', caseNo: 'C-2026-048', docType: '向法院遞狀',          docRef: '114年度智字第56號',      date: '2026-05-15', summary: '原告準備書狀（一）',                deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'B', note: '' },
+  { id: 'DOC-2026-003', direction: '收文', caseNo: 'C-2026-048', docType: '對造律師函',          docRef: '',                       date: '2026-05-20', summary: '對造提出和解方案，要求本週回覆',   deadlineType: '答辯期', deadlineDate: '2026-06-09', driveUrl: '', status: '待處理', lawyer: 'B', note: '需與客戶確認是否接受和解' },
+  { id: 'DOC-2026-004', direction: '發文', caseNo: 'C-2026-048', docType: '回覆客戶',            docRef: '',                       date: '2026-06-02', summary: '案件進度報告信函（第三次）',         deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'B', note: '' },
+
+  // ── C-2026-041 王○○ 借貸契約爭議一審（A 律師）──────────────────────────
+  { id: 'DOC-2026-005', direction: '收文', caseNo: 'C-2026-041', docType: '法院送達－開庭通知',  docRef: '114年度訴字第123號',     date: '2026-04-20', summary: '言詞辯論期日：2026-05-08 10:00',   deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+  { id: 'DOC-2026-006', direction: '發文', caseNo: 'C-2026-041', docType: '向法院遞狀',          docRef: '114年度訴字第123號',     date: '2026-05-05', summary: '民事答辯狀',                        deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+  { id: 'DOC-2026-007', direction: '收文', caseNo: 'C-2026-041', docType: '法院送達－裁定',      docRef: '114年度訴字第123號',     date: '2026-05-18', summary: '法院裁定補正書狀，限 2026-05-28 前', deadlineType: '聲請期', deadlineDate: '2026-05-28', driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+  { id: 'DOC-2026-008', direction: '發文', caseNo: 'C-2026-041', docType: '向法院遞狀',          docRef: '114年度訴字第123號',     date: '2026-05-25', summary: '民事準備書狀（一）補正',            deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+
+  // ── C-2026-041-A 王○○ 上訴案（A 律師）──────────────────────────────────
+  { id: 'DOC-2026-009', direction: '收文', caseNo: 'C-2026-041-A', docType: '法院送達－判決書', docRef: '114年度訴字第123號',      date: '2026-05-10', summary: '一審判決書：原告勝訴，被告可上訴',  deadlineType: '上訴期', deadlineDate: '2026-05-30', driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+  { id: 'DOC-2026-010', direction: '發文', caseNo: 'C-2026-041-A', docType: '向法院遞狀',       docRef: '114年度上字第88號',       date: '2026-05-28', summary: '民事上訴狀',                        deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+  { id: 'DOC-2026-011', direction: '收文', caseNo: 'C-2026-041-A', docType: '法院送達－開庭通知', docRef: '114年度上字第88號',     date: '2026-06-01', summary: '第一次上訴審準備程序庭：2026-06-28', deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'A', note: '' },
+
+  // ── C-2026-038 ○○物流 行政裁罰處分（F 律師）──────────────────────────
+  { id: 'DOC-2026-012', direction: '收文', caseNo: 'C-2026-038', docType: '客戶提送文件',        docRef: '',                       date: '2026-03-15', summary: '客戶提送行政裁罰處分書',            deadlineType: '異議期', deadlineDate: '2026-03-25', driveUrl: '', status: '已處理', lawyer: 'F', note: '' },
+  { id: 'DOC-2026-013', direction: '發文', caseNo: 'C-2026-038', docType: '發函對造',            docRef: '',                       date: '2026-03-22', summary: '訴願書（向原處分機關上級機關提出）',deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'F', note: '' },
+  { id: 'DOC-2026-014', direction: '收文', caseNo: 'C-2026-038', docType: '法院送達－開庭通知',  docRef: '行訴字第0982號',          date: '2026-05-08', summary: '行政法院言詞辯論：2026-06-01 14:00',deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'F', note: '' },
+  { id: 'DOC-2026-015', direction: '發文', caseNo: 'C-2026-038', docType: '向法院遞狀',          docRef: '行訴字第0982號',          date: '2026-05-28', summary: '行政訴訟準備書狀（二）',            deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'F', note: '' },
+
+  // ── C-2026-047 張○○ 離婚（E 律師）──────────────────────────────────────
+  { id: 'DOC-2026-016', direction: '收文', caseNo: 'C-2026-047', docType: '法院送達－開庭通知',  docRef: '114年度家訴字第33號',    date: '2026-05-05', summary: '家事調解期日：2026-06-15 10:30',   deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'E', note: '' },
+  { id: 'DOC-2026-017', direction: '收文', caseNo: 'C-2026-047', docType: '客戶提送文件',        docRef: '',                       date: '2026-05-12', summary: '客戶提送財產清冊（修正版）',        deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'E', note: '' },
+  { id: 'DOC-2026-018', direction: '發文', caseNo: 'C-2026-047', docType: '向法院遞狀',          docRef: '114年度家訴字第33號',    date: '2026-05-20', summary: '民事準備書狀（附財產清冊）',        deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'E', note: '' },
+
+  // ── C-2026-036 ○○電商 消費者保護爭議（C 律師）──────────────────────────
+  { id: 'DOC-2026-019', direction: '收文', caseNo: 'C-2026-036', docType: '法院送達－開庭通知',  docRef: '114年度消字第15號',      date: '2026-05-01', summary: '集體訴訟協調期日：2026-06-20 09:00',deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'C', note: '' },
+  { id: 'DOC-2026-020', direction: '發文', caseNo: 'C-2026-036', docType: '向法院遞狀',          docRef: '114年度消字第15號',      date: '2026-05-08', summary: '原告起訴狀（集體訴訟）',            deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'C', note: '' },
+  { id: 'DOC-2026-021', direction: '收文', caseNo: 'C-2026-036', docType: '對造律師函',          docRef: '',                       date: '2026-05-22', summary: '對造拒絕和解，提出答辯聲明',        deadlineType: '答辯期', deadlineDate: '2026-06-11', driveUrl: '', status: '待處理', lawyer: 'C', note: '' },
+
+  // ── C-2026-037 陳○○ 繼承爭議（H 律師）──────────────────────────────────
+  { id: 'DOC-2026-022', direction: '收文', caseNo: 'C-2026-037', docType: '法院送達－開庭通知',  docRef: '114年度家上字第22號',    date: '2026-05-18', summary: '遺產分割調解期日：2026-06-12 14:00', deadlineType: '無',  deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'H', note: '' },
+  { id: 'DOC-2026-023', direction: '收文', caseNo: 'C-2026-037', docType: '客戶提送文件',        docRef: '',                       date: '2026-05-21', summary: '客戶提送遺產清冊及不動產謄本',      deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'H', note: '' },
+  { id: 'DOC-2026-024', direction: '發文', caseNo: 'C-2026-037', docType: '向法院遞狀',          docRef: '114年度家上字第22號',    date: '2026-06-01', summary: '遺產分割協議書狀',                  deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'H', note: '' },
+
+  // ── C-2026-039 劉○○ 詐欺罪嫌（D 律師）──────────────────────────────────
+  { id: 'DOC-2026-025', direction: '收文', caseNo: 'C-2026-039', docType: '法院送達－開庭通知',  docRef: '114年度訴字第456號',     date: '2026-04-28', summary: '刑事準備程序庭：2026-05-15 10:00',  deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'D', note: '' },
+  { id: 'DOC-2026-026', direction: '發文', caseNo: 'C-2026-039', docType: '向法院遞狀',          docRef: '114年度訴字第456號',     date: '2026-05-08', summary: '辯護意旨狀',                        deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'D', note: '' },
+  { id: 'DOC-2026-027', direction: '收文', caseNo: 'C-2026-039', docType: '法院送達－判決書',    docRef: '114年度訴字第456號',     date: '2026-05-28', summary: '一審有罪判決，有期徒刑一年二個月',  deadlineType: '上訴期', deadlineDate: '2026-06-17', driveUrl: '', status: '待處理', lawyer: 'D', note: '已通知客戶，待確認是否上訴' },
+
+  // ── C-2026-040 ○○製藥 專利侵權（B 律師）──────────────────────────────────
+  { id: 'DOC-2026-028', direction: '收文', caseNo: 'C-2026-040', docType: '法院送達－開庭通知',  docRef: '114年度民專訴字第8號',   date: '2026-04-15', summary: '第一次言詞辯論：2026-06-02 09:30',  deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'B', note: '' },
+  { id: 'DOC-2026-029', direction: '收文', caseNo: 'C-2026-040', docType: '對造律師函',          docRef: '',                       date: '2026-05-10', summary: '對造請求擴張損害賠償範圍',          deadlineType: '答辯期', deadlineDate: '2026-05-30', driveUrl: '', status: '已處理', lawyer: 'B', note: '' },
+  { id: 'DOC-2026-030', direction: '發文', caseNo: 'C-2026-040', docType: '向法院遞狀',          docRef: '114年度民專訴字第8號',   date: '2026-05-28', summary: '被告答辯狀（針對擴張損害賠償）',    deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'B', note: '' },
+
+  // ── C-2026-046 ○○建設 工程承攬（C 律師）──────────────────────────────────
+  { id: 'DOC-2026-031', direction: '收文', caseNo: 'C-2026-046', docType: '法院送達－開庭通知',  docRef: '114年度建字第12號',      date: '2026-05-10', summary: '準備程序期日：2026-06-08 09:00',   deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'C', note: '' },
+  { id: 'DOC-2026-032', direction: '發文', caseNo: 'C-2026-046', docType: '向法院遞狀',          docRef: '114年度建字第12號',      date: '2026-05-30', summary: '原告準備書狀（含工程款計算明細）',  deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'C', note: '' },
+  { id: 'DOC-2026-033', direction: '收文', caseNo: 'C-2026-046', docType: '對造律師函',          docRef: '',                       date: '2026-06-05', summary: '對造主張工程瑕疵，要求減少工程款',  deadlineType: '答辯期', deadlineDate: '2026-06-25', driveUrl: '', status: '待處理', lawyer: 'C', note: '' },
+
+  // ── C-2026-071 李○○ 詐欺罪嫌（J 律師）──────────────────────────────────
+  { id: 'DOC-2026-034', direction: '收文', caseNo: 'C-2026-071', docType: '法院送達－開庭通知',  docRef: '114年度訴字第201號',     date: '2026-05-20', summary: '刑事審判期日：2026-06-10 14:00',   deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'J', note: '' },
+  { id: 'DOC-2026-035', direction: '發文', caseNo: 'C-2026-071', docType: '向法院遞狀',          docRef: '114年度訴字第201號',     date: '2026-05-25', summary: '辯護人意見書',                      deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'J', note: '' },
+  { id: 'DOC-2026-036', direction: '收文', caseNo: 'C-2026-071', docType: '客戶提送文件',        docRef: '',                       date: '2026-06-01', summary: '被告提供不在場證明及通話記錄',      deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'J', note: '' },
+
+  // ── C-2026-072 黃○○ 背信罪嫌（J 律師）──────────────────────────────────
+  { id: 'DOC-2026-037', direction: '收文', caseNo: 'C-2026-072', docType: '法院送達－開庭通知',  docRef: '114年度訴字第202號',     date: '2026-05-25', summary: '刑事準備庭：2026-06-17 10:00',     deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'J', note: '' },
+  { id: 'DOC-2026-038', direction: '發文', caseNo: 'C-2026-072', docType: '向法院遞狀',          docRef: '114年度訴字第202號',     date: '2026-06-03', summary: '辯護意旨狀（背信罪構成要件爭議）',  deadlineType: '無',   deadlineDate: null,         driveUrl: '', status: '已處理', lawyer: 'J', note: '' },
+]
+
 // ── 客戶主檔 ────────────────────────────────────────────────────────────────
 // 正式來源：Google Sheets「客戶主檔」工作表
 //   A 客戶編號   B 姓名     C 稱謂     D 客戶類型(個人/公司)

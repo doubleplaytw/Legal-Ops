@@ -240,6 +240,44 @@ export async function fetchClientMaster() {
   }))
 }
 
+// ── 收發文 ────────────────────────────────────────────────────────────────
+
+/**
+ * 回傳格式：Document[]，含計算後的 daysLeft
+ * Sheets 欄位：A收發文ID B方向 C案件編號 D文件類型 E文號 F收發日期
+ *              G摘要 H時效類型 I時效截止日 J Drive連結 K處理狀態 L負責律師 M備註
+ */
+export async function fetchDocuments() {
+  let rows
+  try {
+    rows = await fetchRange('收發文!A2:M')
+  } catch {
+    // 工作表尚未建立時回傳空陣列，不阻斷頁面渲染
+    return []
+  }
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return rows.map(([id, direction, caseNo, docType, docRef, date, summary,
+    deadlineType, deadlineDate, driveUrl, status, lawyer, note]) => ({
+    id,
+    direction,
+    caseNo,
+    docType,
+    docRef: docRef ?? '',
+    date,
+    summary: summary ?? '',
+    deadlineType: deadlineType ?? '無',
+    deadlineDate: deadlineDate || null,
+    driveUrl: driveUrl ?? '',
+    status: status ?? '待處理',
+    lawyer: lawyer ?? '',
+    note: note ?? '',
+    daysLeft: deadlineDate
+      ? Math.floor((new Date(deadlineDate) - today) / 86400000)
+      : null,
+  }))
+}
+
 // ── 諮詢預約表單寫入（透過 Apps Script）────────────────────────────────────
 
 /**
@@ -250,6 +288,21 @@ export async function fetchClientMaster() {
  *   { name, phone, email, identity, companyName,
  *     caseType, description, preferredDate, timeSlot, referral }
  */
+/**
+ * 透過 Apps Script 新增一筆收發文
+ * data 格式對應 fetchDocuments() 的欄位（id 由 Apps Script 自動產生）
+ */
+export async function submitDocument(data) {
+  if (!APPS_SCRIPT_URL) throw new Error('VITE_APPS_SCRIPT_URL 未設定')
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'addDocument', ...data }),
+  })
+  if (!res.ok) throw new Error(`Apps Script error: ${res.status}`)
+  return res.json()
+}
+
 export async function submitIntakeForm(data) {
   if (!APPS_SCRIPT_URL) throw new Error('VITE_APPS_SCRIPT_URL 未設定')
   // Content-Type 使用 text/plain 可避免 CORS preflight，Apps Script 仍可解析 JSON body
