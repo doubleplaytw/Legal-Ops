@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { MOCK_CLIENT_MASTER, MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
+import { fetchClientMaster } from '../services/sheets'
 
 // ── 常數 ──────────────────────────────────────────────────────────────────
 
@@ -310,9 +311,19 @@ export default function ClientMasterView() {
   const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState(INIT_FILTERS)
+  const [sheetClients, setSheetClients] = useState([])
+
+  useEffect(() => {
+    fetchClientMaster()
+      .then(setSheetClients)
+      .catch(err => console.error('fetchClientMaster failed:', err))
+  }, [])
 
   const intakeClients = useMemo(() => loadIntakeQueue().map(intakeToClient), [])
-  const allClients = useMemo(() => [...intakeClients, ...MOCK_CLIENT_MASTER], [intakeClients])
+  const allClients = useMemo(
+    () => [...intakeClients, ...(sheetClients.length > 0 ? sheetClients : MOCK_CLIENT_MASTER)],
+    [intakeClients, sheetClients]
+  )
 
   const uniqueReferrals = useMemo(() =>
     [...new Set(allClients.map(c => c.referral).filter(Boolean))].sort()
