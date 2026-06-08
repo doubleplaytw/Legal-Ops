@@ -9,6 +9,8 @@ function loadIntakeCases() {
   catch { return [] }
 }
 
+const SELECT_CLS = 'text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white'
+
 const TODAY = new Date()
 TODAY.setHours(0, 0, 0, 0)
 
@@ -232,7 +234,7 @@ export default function CaseView() {
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500">負責律師</label>
           <select value={filterLawyer} onChange={(e) => setFilterLawyer(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white">
+            className={SELECT_CLS}>
             {lawyers.map((l) => <option key={l} value={l}>{l === 'all' ? '全部律師' : `${l} 律師`}</option>)}
           </select>
         </div>
@@ -240,7 +242,7 @@ export default function CaseView() {
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500">案件類型</label>
           <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white">
+            className={SELECT_CLS}>
             <option value="all">全部類型</option>
             {CASE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>

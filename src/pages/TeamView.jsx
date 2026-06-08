@@ -4,6 +4,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { MOCK_LAWYERS, MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
 
+const SELECT_CLS = 'text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white'
+
 const SORT_OPTIONS = [
   { value: 'id',       label: '字母 A → L' },
   { value: 'active',   label: '進行中案件（多→少）' },
@@ -246,7 +248,7 @@ export default function TeamView() {
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value)}
-            className="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white"
+            className={SELECT_CLS}
           >
             {SORT_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>{o.label}</option>

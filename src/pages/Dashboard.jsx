@@ -12,6 +12,7 @@ import {
   MOCK_UPCOMING_DEADLINES,
   DEADLINE_CATEGORIES,
   MOCK_CASES,
+  CASE_STATUSES,
   MOCK_CLIENT_HEALTH,
   MOCK_CYCLE_DAYS_BY_TYPE,
   MOCK_CONVERSION_FUNNEL,
@@ -24,6 +25,9 @@ import {
   MOCK_CONSULTATION_HOURS,
   MOCK_LAWYERS,
 } from '../constants/mockData'
+
+const TODAY = new Date()
+TODAY.setHours(0, 0, 0, 0)
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -151,13 +155,7 @@ function ChartCard({ title, badge, headerRight, children, className = '' }) {
   )
 }
 
-const PIPELINE_STAGES = [
-  { key: 'appointment', label: '預約諮詢', color: '#94A3B8' },
-  { key: 'meeting',     label: '進行會晤', color: '#8B5CF6' },
-  { key: 'quote',       label: '報價',     color: '#0D9488' },
-  { key: 'signing',     label: '簽約',     color: '#F97316' },
-  { key: 'active',      label: '進行中',   color: '#1E3480' },
-]
+const PIPELINE_STAGES = CASE_STATUSES.slice(0, 5)
 
 function FunnelChart({ data }) {
   const max = data[0]?.count || 1
@@ -343,15 +341,12 @@ export default function Dashboard() {
   const consultData  = aggregateByType(MOCK_CONSULTATION_CASES)
 
 
-  const todayDate = new Date()
-  todayDate.setHours(0, 0, 0, 0)
-
   const followUpEvents = MOCK_CLIENT_HEALTH.flatMap((client) =>
     client.followUps.filter((f) => !f.done && f.date).map((f) => ({
       id: `fu-${client.id}-${f.id}`,
       taskTitle: f.task,
       date: f.date,
-      daysLeft: Math.floor((new Date(f.date) - todayDate) / 86400000),
+      daysLeft: Math.floor((new Date(f.date) - TODAY) / 86400000),
       category: f.category,
       caseNo: client.caseNo,
       parties: client.parties,
@@ -365,7 +360,7 @@ export default function Dashboard() {
   const allEventsRaw = [
     ...MOCK_UPCOMING_DEADLINES.map((e) => ({
       ...e,
-      daysLeft: Math.floor((new Date(e.date) - todayDate) / 86400000),
+      daysLeft: Math.floor((new Date(e.date) - TODAY) / 86400000),
       taskTitle: e.action,
     })),
     ...followUpEvents,
