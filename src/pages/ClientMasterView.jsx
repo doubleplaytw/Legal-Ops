@@ -55,7 +55,7 @@ function intakeToClient(entry, idx) {
     conflictCheck: 'unchecked',
     conflictCheckDate: '',
     conflictNote: '',
-    linkedCaseIds: [],
+    linkedCaseIds: entry.appointmentCaseId ? [entry.appointmentCaseId] : [],
     initialNote: entry.description || '',
     internalNote: '',
     createdAt: entry.submittedAt || '',

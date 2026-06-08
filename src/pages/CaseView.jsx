@@ -4,6 +4,11 @@ import { MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
 import { useDemoMode } from '../hooks/useDemoMode'
 
+function loadIntakeCases() {
+  try { return JSON.parse(localStorage.getItem('intake_cases') || '[]') }
+  catch { return [] }
+}
+
 const TODAY = new Date()
 TODAY.setHours(0, 0, 0, 0)
 
@@ -150,7 +155,7 @@ function CaseCard({ c, allCases }) {
   )
 }
 
-function KanbanColumn({ status, cases, stageIndex, isDemoMode }) {
+function KanbanColumn({ status, cases, stageIndex, isDemoMode, allCases }) {
   const overdueCount = cases.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
   const displayLabel = isDemoMode ? `階段 ${stageIndex}` : status.label
   return (
@@ -172,7 +177,7 @@ function KanbanColumn({ status, cases, stageIndex, isDemoMode }) {
         {cases.length === 0 && (
           <div className="flex items-center justify-center h-20 text-xs text-gray-300">無案件</div>
         )}
-        {cases.map((c) => <CaseCard key={c.id} c={c} allCases={MOCK_CASES} />)}
+        {cases.map((c) => <CaseCard key={c.id} c={c} allCases={allCases} />)}
       </div>
     </div>
   )
@@ -187,8 +192,10 @@ export default function CaseView() {
 
   const lawyers = ['all', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
+  const allCases = useMemo(() => [...loadIntakeCases(), ...MOCK_CASES], [])
+
   const filtered = useMemo(() => {
-    return MOCK_CASES.filter((c) => {
+    return allCases.filter((c) => {
       if (filterLawyer !== 'all' && c.lawyer !== filterLawyer) return false
       if (filterType !== 'all' && c.type !== filterType) return false
       if (filterOverdue) {
@@ -198,7 +205,7 @@ export default function CaseView() {
       if (filterPendingRenewal && c.status !== 'pending_renewal') return false
       return true
     })
-  }, [filterLawyer, filterType, filterOverdue, filterPendingRenewal])
+  }, [allCases, filterLawyer, filterType, filterOverdue, filterPendingRenewal])
 
   const byStatus = useMemo(() => {
     const map = {}
@@ -207,8 +214,8 @@ export default function CaseView() {
     return map
   }, [filtered])
 
-  const overdueTotal = MOCK_CASES.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
-  const pendingRenewalTotal = MOCK_CASES.filter((c) => c.status === 'pending_renewal').length
+  const overdueTotal = allCases.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
+  const pendingRenewalTotal = allCases.filter((c) => c.status === 'pending_renewal').length
 
   return (
     <div className="px-8 py-8 flex flex-col gap-6 h-full">
@@ -259,7 +266,7 @@ export default function CaseView() {
       <HScrollArea>
         <div className="flex gap-5 h-full" style={{ width: 'max-content' }}>
           {CASE_STATUSES.map((status, idx) => (
-            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} stageIndex={idx + 1} isDemoMode={isDemoMode} />
+            <KanbanColumn key={status.key} status={status} cases={byStatus[status.key]} stageIndex={idx + 1} isDemoMode={isDemoMode} allCases={allCases} />
           ))}
         </div>
       </HScrollArea>

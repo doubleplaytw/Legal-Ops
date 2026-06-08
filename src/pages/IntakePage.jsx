@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 const BRANCHES      = ['台北總所', '台中分所', '高雄分所', '線上諮詢']
-const REFERRALS     = ['網路社群', '報章雜誌', '其他']
+const REFERRALS     = ['親友介紹', '網路社群', '報章雜誌', '其他']
 const CONSULT_TYPES = ['法律諮詢', '課程講師', '公關活動', '其他業務']
 
 const INPUT_CLS = 'flex-1 text-sm border-0 border-b border-gray-200 py-2 px-0 text-gray-800 focus:outline-none focus:border-[#1E3480] bg-transparent placeholder:text-gray-300 transition'
@@ -75,12 +75,39 @@ export default function IntakePage() {
     const errs = validate()
     if (Object.keys(errs).length) { setErrors(errs); return }
     setStatus('submitting')
+
+    const caseId = `APPT-${Date.now()}`
+    const today  = new Date().toISOString().split('T')[0]
+    const branchStr = Array.isArray(form.branch) ? form.branch.join('、') : (form.branch || '')
+
     // Demo：寫入 localStorage 供客戶主檔讀取；正式串接 Apps Script 後移除
     try {
       const queue = JSON.parse(localStorage.getItem('intake_queue') || '[]')
-      queue.unshift({ ...form, submittedAt: new Date().toISOString().split('T')[0] })
+      queue.unshift({ ...form, submittedAt: today, appointmentCaseId: caseId })
       localStorage.setItem('intake_queue', JSON.stringify(queue))
     } catch (_) {}
+
+    // 同步生成預約案件，供案件看板（CaseView）讀取
+    try {
+      const cases = JSON.parse(localStorage.getItem('intake_cases') || '[]')
+      const typeMap = { '課程講師': '教育訓練' }
+      cases.unshift({
+        id: caseId,
+        parties: `${form.name}${form.salutation || ''}`,
+        cause: form.consultType || '初次諮詢',
+        relief: form.description || '預約諮詢',
+        type: typeMap[form.consultType] || form.consultType || '法律諮詢',
+        status: 'appointment',
+        lawyer: '待指派',
+        nextDeadline: null,
+        expectedCloseDate: null,
+        fromIntake: true,
+        branch: branchStr,
+        createdAt: today,
+      })
+      localStorage.setItem('intake_cases', JSON.stringify(cases))
+    } catch (_) {}
+
     // TODO: 串接 Apps Script（見 docs/apps-script.js）
     setTimeout(() => setStatus('success'), 800)
   }
@@ -117,7 +144,7 @@ export default function IntakePage() {
                     <div className="flex-1 relative">
                       <select className={SELECT_CLS} value={form.consultType}
                         onChange={e => set('consultType', e.target.value)}>
-                        <option value="">請選擇想要諮詢的項目</option>
+                        <option value="" disabled>請選擇想要諮詢的項目</option>
                         {CONSULT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                       </select>
                       <svg className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
@@ -199,7 +226,7 @@ export default function IntakePage() {
                     <div className="flex-1 relative">
                       <select className={SELECT_CLS} value={form.referral}
                         onChange={e => set('referral', e.target.value)}>
-                        <option value="">如何得知我們</option>
+                        <option value="" disabled>如何得知我們</option>
                         {REFERRALS.map(r => <option key={r} value={r}>{r}</option>)}
                       </select>
                       <svg className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
