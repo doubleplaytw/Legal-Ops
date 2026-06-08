@@ -13,7 +13,7 @@
  * 【案件】主資料，每案一列
  *   A 案件編號  B 建立日期  C 當事人  D 案由  E 聲明事項  F 案件類型
  *   G 狀態      H 負責律師  I 下次期限  J 預計結案日  K 實際結案日
- *   L 父案編號  M 子案類型(appeal/enforcement)  N 審級
+ *   L 父案編號  M 子案類型(appeal/enforcement)  N 審級  O 客戶編號
  *
  * 【接觸紀錄】客戶健康追蹤的溝通紀錄
  *   A 紀錄ID  B 案件編號  C 接觸日期  D 接觸類型  E 律師  F 備註
@@ -32,7 +32,7 @@
  *   A 連結ID  B 案件編號  C 文件名稱  D URL
  *
  * 【客戶主檔】一客戶一列，建檔後人工維護；Landing page 表單投件後由律師補全
- *   A 客戶編號   B 姓名     C 稱謂     D 客戶類型(個人/公司)
+ *   A 客戶編號   B 姓名     C 稱謂     D 客戶類型(未使用)
  *   E 統一編號   F 身分證字號 G 行動電話  H 聯絡電話
  *   I 電子信箱   J 所屬分所  K 來源管道  L 初始諮詢項目
  *   M 客戶狀態(待諮詢/諮詢中/委任中/前客戶/流失)
@@ -90,9 +90,9 @@ export async function fetchLawyerSettings() {
  * 回傳格式與 MOCK_CASES 一致
  */
 export async function fetchCases() {
-  const rows = await fetchRange('案件!A2:N')
+  const rows = await fetchRange('案件!A2:O')
   return rows.map(([id, createdAt, parties, cause, relief, type, status, lawyer,
-    nextDeadline, expectedCloseDate, closedAt, parentCaseId, subType, instanceLevel]) => ({
+    nextDeadline, expectedCloseDate, closedAt, parentCaseId, subType, instanceLevel, clientNo]) => ({
     id,
     createdAt: createdAt || null,
     parties,
@@ -107,6 +107,7 @@ export async function fetchCases() {
     parentCaseId: parentCaseId || null,
     subType: subType || null,
     instanceLevel: instanceLevel || null,
+    clientNo: clientNo || null,
   }))
 }
 

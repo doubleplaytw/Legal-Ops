@@ -28,42 +28,6 @@ const CONFLICT_CONFIG = {
 
 const SELECT_CLS = 'w-full text-xs border border-gray-100 rounded-lg bg-gray-50 py-1.5 px-2 text-gray-600 focus:outline-none focus:border-[#1E3480] appearance-none cursor-pointer transition'
 
-// ── localStorage 串接（Demo 用）────────────────────────────────────────────
-
-function loadIntakeQueue() {
-  try { return JSON.parse(localStorage.getItem('intake_queue') || '[]') }
-  catch { return [] }
-}
-
-function intakeToClient(entry, idx) {
-  return {
-    id: `intake-${idx}`,
-    clientNo: '待建檔',
-    name: entry.name || '（未填姓名）',
-    salutation: entry.salutation || '',
-    clientType: 'individual',
-    taxId: '',
-    nationalId: '',
-    mobile: entry.mobile || '',
-    phone: entry.phone || '',
-    email: entry.email || '',
-    branch: Array.isArray(entry.branch) ? entry.branch.join('、') : (entry.branch || ''),
-    referral: entry.referral || '',
-    consultType: entry.consultType || '',
-    clientStatus: 'pending',
-    assignedLawyer: '',
-    contractStatus: 'unsigned',
-    conflictCheck: 'unchecked',
-    conflictCheckDate: '',
-    conflictNote: '',
-    linkedCaseIds: entry.appointmentCaseId ? [entry.appointmentCaseId] : [],
-    initialNote: entry.description || '',
-    internalNote: '',
-    createdAt: entry.submittedAt || '',
-    fromIntake: true,
-  }
-}
-
 // ── 小工具 ─────────────────────────────────────────────────────────────────
 
 function getLinkedCases(client) {
@@ -120,8 +84,6 @@ const Dash = () => <span className="text-gray-300">—</span>
 // ── 清單項目 ───────────────────────────────────────────────────────────────
 
 function ClientListItem({ client, selected, onClick }) {
-  const isCompany = client.clientType === 'company'
-
   return (
     <button
       onClick={onClick}
@@ -139,14 +101,8 @@ function ClientListItem({ client, selected, onClick }) {
         <div className="flex items-center gap-1.5 mb-0.5 min-w-0">
           <p className="text-sm font-semibold text-[#1E3480] truncate">{client.name}</p>
           {client.salutation && <span className="text-xs text-gray-400 shrink-0">{client.salutation}</span>}
-          {client.fromIntake && (
-            <span className="text-xs font-bold px-1 py-0 rounded bg-[#E8A020]/15 text-[#E8A020] shrink-0">新</span>
-          )}
         </div>
         <div className="flex items-center gap-1.5">
-          <span className={`text-xs px-1.5 py-0.5 rounded ${isCompany ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-500'}`}>
-            {isCompany ? '公司' : '個人'}
-          </span>
           <span className="text-xs text-gray-400">
             {client.assignedLawyer ? `${client.assignedLawyer} 律師` : '未指派'}
           </span>
@@ -164,7 +120,6 @@ function ClientListItem({ client, selected, onClick }) {
 
 function DetailPanel({ client, onBack }) {
   const linkedCases = getLinkedCases(client)
-  const isCompany = client.clientType === 'company'
   const contractCfg = CONTRACT_CONFIG[client.contractStatus] || CONTRACT_CONFIG.unsigned
   const conflictCfg = CONFLICT_CONFIG[client.conflictCheck] || CONFLICT_CONFIG.unchecked
 
@@ -194,13 +149,7 @@ function DetailPanel({ client, onBack }) {
               {client.salutation && <span className="text-sm text-gray-500">{client.salutation}</span>}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-xs px-1.5 py-0.5 rounded ${isCompany ? 'bg-amber-50 text-amber-600' : 'bg-indigo-50 text-indigo-500'}`}>
-                {isCompany ? '公司客戶' : '個人客戶'}
-              </span>
               <StatusBadge status={client.clientStatus} />
-              {client.fromIntake && (
-                <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-[#E8A020]/15 text-[#E8A020]">Landing page 新進</span>
-              )}
             </div>
           </div>
         </div>
@@ -222,7 +171,7 @@ function DetailPanel({ client, onBack }) {
           <InfoRow label="聯絡電話">{client.phone || <Dash />}</InfoRow>
           <InfoRow label="電子信箱">{client.email || <Dash />}</InfoRow>
           <InfoRow label="客戶ID">
-            {(isCompany ? client.taxId : client.nationalId) || <Dash />}
+            {client.nationalId || client.taxId || <Dash />}
           </InfoRow>
           <InfoRow label="來源管道">{client.referral || <Dash />}</InfoRow>
           <InfoRow label="初始諮詢">{client.consultType || <Dash />}</InfoRow>
@@ -305,7 +254,7 @@ function DetailPanel({ client, onBack }) {
 
 // ── 主頁面 ─────────────────────────────────────────────────────────────────
 
-const INIT_FILTERS = { status: 'all', clientType: 'all', referral: 'all', branch: 'all' }
+const INIT_FILTERS = { status: 'all', referral: 'all', branch: 'all' }
 
 export default function ClientMasterView() {
   const [selected, setSelected] = useState(null)
@@ -319,13 +268,10 @@ export default function ClientMasterView() {
       .catch(err => console.error('fetchClientMaster failed:', err))
   }, [])
 
-  const intakeClients = useMemo(() => loadIntakeQueue().map(intakeToClient), [])
-  const allClients = useMemo(() => {
-    const base = sheetClients.length > 0 ? sheetClients : MOCK_CLIENT_MASTER
-    const sheetMobiles = new Set(base.map(c => c.mobile).filter(Boolean))
-    const newIntake = intakeClients.filter(c => !sheetMobiles.has(c.mobile))
-    return [...newIntake, ...base]
-  }, [intakeClients, sheetClients])
+  const allClients = useMemo(
+    () => sheetClients.length > 0 ? sheetClients : MOCK_CLIENT_MASTER,
+    [sheetClients]
+  )
 
   const uniqueReferrals = useMemo(() =>
     [...new Set(allClients.map(c => c.referral).filter(Boolean))].sort()
@@ -341,9 +287,8 @@ export default function ClientMasterView() {
 
   const filtered = useMemo(() => {
     let list = allClients
-    if (filters.status !== 'all')     list = list.filter(c => c.clientStatus === filters.status)
-    if (filters.clientType !== 'all') list = list.filter(c => c.clientType === filters.clientType)
-    if (filters.referral !== 'all')   list = list.filter(c => c.referral === filters.referral)
+    if (filters.status !== 'all')   list = list.filter(c => c.clientStatus === filters.status)
+    if (filters.referral !== 'all') list = list.filter(c => c.referral === filters.referral)
     if (filters.branch !== 'all')     list = list.filter(c => c.branch?.includes(filters.branch))
     if (search.trim()) {
       const q = search.trim().toLowerCase()
@@ -394,15 +339,6 @@ export default function ClientMasterView() {
               {STATUS_ORDER.map(s => (
                 <option key={s} value={s}>{CLIENT_STATUS_CONFIG[s].label}</option>
               ))}
-            </select>
-            <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-
-          <div className="relative">
-            <select value={filters.clientType} onChange={e => setFilter('clientType', e.target.value)} className={SELECT_CLS}>
-              <option value="all">個人 / 公司</option>
-              <option value="individual">個人</option>
-              <option value="company">公司</option>
             </select>
             <svg className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </div>

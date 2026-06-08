@@ -4,11 +4,6 @@ import { MOCK_CASES, CASE_STATUSES } from '../constants/mockData'
 import { CASE_TYPES, CASE_TYPE_COLORS } from '../constants/caseTypes'
 import { useDemoMode } from '../hooks/useDemoMode'
 
-function loadIntakeCases() {
-  try { return JSON.parse(localStorage.getItem('intake_cases') || '[]') }
-  catch { return [] }
-}
-
 const SELECT_CLS = 'text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1E3480]/20 focus:border-[#1E3480] bg-white'
 
 const TODAY = new Date()
@@ -194,7 +189,7 @@ export default function CaseView() {
 
   const lawyers = ['all', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
-  const allCases = useMemo(() => [...loadIntakeCases(), ...MOCK_CASES], [])
+  const allCases = useMemo(() => MOCK_CASES, [])
 
   const filtered = useMemo(() => {
     return allCases.filter((c) => {

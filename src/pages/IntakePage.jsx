@@ -46,6 +46,25 @@ function SuccessScreen() {
   )
 }
 
+function ErrorScreen() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-5 py-12 text-center px-6">
+      <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div>
+        <h2 className="text-xl font-bold text-[#1E3480] mb-2">送出失敗</h2>
+        <p className="text-sm text-gray-500 leading-relaxed">
+          很抱歉，系統暫時無法接收申請。<br />
+          請直接來電或稍後再試。
+        </p>
+      </div>
+    </div>
+  )
+}
+
 export default function IntakePage() {
   const [form, setForm] = useState({
     consultType: '', salutation: '先生', name: '',
@@ -77,41 +96,12 @@ export default function IntakePage() {
     if (Object.keys(errs).length) { setErrors(errs); return }
     setStatus('submitting')
 
-    const caseId = `APPT-${Date.now()}`
     const today  = new Date().toISOString().split('T')[0]
     const branchStr = Array.isArray(form.branch) ? form.branch.join('、') : (form.branch || '')
 
-    // Demo：寫入 localStorage 供客戶主檔讀取；正式串接 Apps Script 後移除
-    try {
-      const queue = JSON.parse(localStorage.getItem('intake_queue') || '[]')
-      queue.unshift({ ...form, submittedAt: today, appointmentCaseId: caseId })
-      localStorage.setItem('intake_queue', JSON.stringify(queue))
-    } catch (_) {}
-
-    // 同步生成預約案件，供案件看板（CaseView）讀取
-    try {
-      const cases = JSON.parse(localStorage.getItem('intake_cases') || '[]')
-      const typeMap = { '課程講師': '教育訓練' }
-      cases.unshift({
-        id: caseId,
-        parties: `${form.name}${form.salutation || ''}`,
-        cause: form.consultType || '初次諮詢',
-        relief: form.description || '預約諮詢',
-        type: typeMap[form.consultType] || form.consultType || '法律諮詢',
-        status: 'appointment',
-        lawyer: '待指派',
-        nextDeadline: null,
-        expectedCloseDate: null,
-        fromIntake: true,
-        branch: branchStr,
-        createdAt: today,
-      })
-      localStorage.setItem('intake_cases', JSON.stringify(cases))
-    } catch (_) {}
-
-    submitIntakeForm({ ...form, branch: branchStr, submittedAt: today, appointmentCaseId: caseId })
+    submitIntakeForm({ ...form, branch: branchStr, submittedAt: today })
       .then(() => setStatus('success'))
-      .catch(() => setStatus('success')) // Apps Script 失敗時仍顯示成功（資料已存 localStorage）
+      .catch(() => setStatus('error'))
   }
 
   return (
@@ -135,6 +125,10 @@ export default function IntakePage() {
           {status === 'success' ? (
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
               <SuccessScreen />
+            </div>
+          ) : status === 'error' ? (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+              <ErrorScreen />
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate>
