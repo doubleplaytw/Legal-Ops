@@ -320,10 +320,12 @@ export default function ClientMasterView() {
   }, [])
 
   const intakeClients = useMemo(() => loadIntakeQueue().map(intakeToClient), [])
-  const allClients = useMemo(
-    () => [...intakeClients, ...(sheetClients.length > 0 ? sheetClients : MOCK_CLIENT_MASTER)],
-    [intakeClients, sheetClients]
-  )
+  const allClients = useMemo(() => {
+    const base = sheetClients.length > 0 ? sheetClients : MOCK_CLIENT_MASTER
+    const sheetMobiles = new Set(base.map(c => c.mobile).filter(Boolean))
+    const newIntake = intakeClients.filter(c => !sheetMobiles.has(c.mobile))
+    return [...newIntake, ...base]
+  }, [intakeClients, sheetClients])
 
   const uniqueReferrals = useMemo(() =>
     [...new Set(allClients.map(c => c.referral).filter(Boolean))].sort()

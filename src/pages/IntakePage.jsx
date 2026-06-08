@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { submitIntakeForm } from '../services/sheets'
 
 const BRANCHES      = ['台北總所', '台中分所', '高雄分所', '線上諮詢']
 const REFERRALS     = ['親友介紹', '網路社群', '報章雜誌', '其他']
@@ -108,8 +109,9 @@ export default function IntakePage() {
       localStorage.setItem('intake_cases', JSON.stringify(cases))
     } catch (_) {}
 
-    // TODO: 串接 Apps Script（見 docs/apps-script.js）
-    setTimeout(() => setStatus('success'), 800)
+    submitIntakeForm({ ...form, branch: branchStr, submittedAt: today, appointmentCaseId: caseId })
+      .then(() => setStatus('success'))
+      .catch(() => setStatus('success')) // Apps Script 失敗時仍顯示成功（資料已存 localStorage）
   }
 
   return (
