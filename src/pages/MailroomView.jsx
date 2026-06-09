@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { fetchDocuments, fetchCases, fetchLawyerSettings, submitDocument } from '../services/sheets'
-import DocumentForm from '../components/modules/DocumentForm'
+import { fetchDocuments, fetchCases } from '../services/sheets'
 import { daysUntil } from '../utils/deadlineCalc'
 import { MOCK_DOCUMENTS, MOCK_CASES } from '../constants/mockData'
 
@@ -19,23 +18,19 @@ function DeadlineBadge({ deadlineDate, deadlineType }) {
 export default function MailroomView() {
   const [docs, setDocs] = useState([])
   const [cases, setCases] = useState([])
-  const [lawyers, setLawyers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showForm, setShowForm] = useState(false)
-  const [saving, setSaving] = useState(false)
+
   const [dirFilter, setDirFilter] = useState('全部')
   const [statusFilter, setStatusFilter] = useState('全部')
 
   async function loadData() {
-    const [docsData, casesData, lawyerMap] = await Promise.all([
+    const [docsData, casesData] = await Promise.all([
       fetchDocuments(),
       fetchCases(),
-      fetchLawyerSettings(),
     ])
     setDocs(docsData.length > 0 ? docsData : MOCK_DOCUMENTS)
     setCases(casesData.length > 0 ? casesData : MOCK_CASES)
-    setLawyers(Object.values(lawyerMap).map(l => l.name).filter(Boolean))
   }
 
   useEffect(() => {
@@ -67,20 +62,6 @@ export default function MailroomView() {
     return days !== null && days < 0
   }).length
 
-  async function handleSubmit(formData) {
-    setSaving(true)
-    try {
-      await submitDocument(formData)
-      const updated = await fetchDocuments()
-      setDocs(updated)
-      setShowForm(false)
-    } catch (e) {
-      alert('儲存失敗：' + e.message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   if (loading) return (
     <div className="flex items-center justify-center h-64 text-gray-400 text-sm">載入中…</div>
   )
@@ -97,14 +78,6 @@ export default function MailroomView() {
           <h1 className="text-2xl font-bold text-[#1E3480]">Mail Room</h1>
           <p className="text-xs text-gray-400 mt-0.5">共 {docs.length} 筆記錄</p>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 bg-[#1E3480] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-[#2E56C8] transition-colors"
-        >
-          <span className="text-lg leading-none">+</span>
-          <span className="hidden sm:inline">新增收發文</span>
-          <span className="sm:hidden">新增</span>
-        </button>
       </div>
 
       {/* Summary cards */}
@@ -252,15 +225,6 @@ export default function MailroomView() {
         )}
       </div>
 
-      {showForm && (
-        <DocumentForm
-          cases={cases}
-          lawyers={lawyers}
-          onSubmit={handleSubmit}
-          onClose={() => setShowForm(false)}
-          loading={saving}
-        />
-      )}
     </div>
   )
 }
