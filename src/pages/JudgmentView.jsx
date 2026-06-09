@@ -124,7 +124,7 @@ function LinkModal({ judgment, links, onClose, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-[480px] max-h-[560px] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl w-[90vw] max-w-[480px] max-h-[560px] flex flex-col overflow-hidden">
 
         <div className="px-6 py-5 border-b border-gray-100 shrink-0">
           <h3 className="text-base font-bold text-[#1E3480]">關聯至案件</h3>
@@ -207,7 +207,7 @@ function LinkModal({ judgment, links, onClose, onConfirm }) {
   )
 }
 
-function DetailPanel({ judgment, links, onOpenModal }) {
+function DetailPanel({ judgment, links, onBack, onOpenModal }) {
   const linkedClientIds = links
     .filter(l => l.judgmentId === judgment.id)
     .map(l => l.clientId)
@@ -215,7 +215,16 @@ function DetailPanel({ judgment, links, onOpenModal }) {
 
   return (
     <div className="flex flex-col h-full overflow-y-auto">
-      <div className="px-6 py-6 border-b border-gray-100 shrink-0">
+      <div className="px-4 md:px-6 py-4 md:py-6 border-b border-gray-100 shrink-0">
+        <button
+          onClick={onBack}
+          className="md:hidden flex items-center gap-1.5 text-sm font-semibold text-[#1E3480] mb-4"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          返回列表
+        </button>
         <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">{judgment.court}</p>
         <h2 className="text-base font-bold text-[#1E3480] leading-snug mb-3">{judgment.caseNo}</h2>
 
@@ -353,7 +362,7 @@ export default function JudgmentView({ links, onLink }) {
     <div className="flex flex-col h-full">
 
       {/* Header */}
-      <div className="px-8 py-6 shrink-0 border-b border-gray-100 bg-white">
+      <div className="px-4 md:px-8 py-4 md:py-6 shrink-0 border-b border-gray-100 bg-white">
         <div className="flex items-end gap-4 mb-5">
           <div>
             <p className="text-xs font-semibold text-[#E8A020] tracking-widest uppercase mb-1">Research</p>
@@ -495,7 +504,7 @@ export default function JudgmentView({ links, onLink }) {
       <div className="flex flex-1 overflow-hidden">
 
         {/* Left: judgment list */}
-        <div className="w-[360px] shrink-0 border-r border-gray-100 overflow-y-auto bg-white">
+        <div className={`${selected ? 'hidden md:flex md:flex-col' : 'flex flex-col flex-1'} md:w-[360px] md:shrink-0 border-r border-gray-100 overflow-y-auto bg-white`}>
           {filtered.length === 0 && (
             <p className="text-sm text-gray-400 text-center py-16">無符合條件的判決</p>
           )}
@@ -511,11 +520,12 @@ export default function JudgmentView({ links, onLink }) {
         </div>
 
         {/* Right: detail panel */}
-        <div className="flex-1 overflow-hidden bg-[#F4F6FB]">
+        <div className={`${selected ? 'flex flex-col flex-1' : 'hidden md:flex'} overflow-hidden bg-[#F4F6FB]`}>
           {selected ? (
             <DetailPanel
               judgment={selected}
               links={links}
+              onBack={() => setSelected(null)}
               onOpenModal={() => setModalOpen(true)}
             />
           ) : (

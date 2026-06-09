@@ -215,7 +215,7 @@ export default function CaseView() {
   const pendingRenewalTotal = allCases.filter((c) => c.status === 'pending_renewal').length
 
   return (
-    <div className="px-8 py-8 flex flex-col gap-6 h-full">
+    <div className="px-4 md:px-8 py-4 md:py-8 flex flex-col gap-6 h-full">
 
       <div className="flex items-end gap-4 shrink-0">
         <div>

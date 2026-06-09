@@ -45,7 +45,7 @@ function StatuteLinkModal({ statute, links, onClose, onConfirm }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-xl w-[480px] max-h-[560px] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-xl w-[90vw] max-w-[480px] max-h-[560px] flex flex-col overflow-hidden">
 
         <div className="px-6 py-5 border-b border-gray-100 shrink-0">
           <h3 className="text-base font-bold text-[#1E3480]">關聯至案件</h3>
@@ -207,7 +207,7 @@ export default function StatutesView({ links = [], onLink }) {
   }
 
   return (
-    <div className="px-8 py-8 flex flex-col gap-6 h-full">
+    <div className="px-4 md:px-8 py-4 md:py-8 flex flex-col gap-6 h-full">
 
       {/* Page title */}
       <div className="flex items-end gap-4 shrink-0">
@@ -283,8 +283,9 @@ export default function StatutesView({ links = [], onLink }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex-1 overflow-y-auto">
-        <table className="w-full">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex-1 min-h-0">
+        <div className="overflow-x-auto overflow-y-auto h-full">
+        <table className="w-full" style={{ minWidth: '700px' }}>
           <thead className="sticky top-0 bg-gray-50 border-b border-gray-100 z-10">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-wider w-24">時效種類</th>
@@ -314,6 +315,7 @@ export default function StatutesView({ links = [], onLink }) {
             )}
           </tbody>
         </table>
+        </div>
       </div>
 
       {/* Link Modal */}
