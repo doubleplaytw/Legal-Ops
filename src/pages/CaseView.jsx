@@ -184,7 +184,6 @@ export default function CaseView() {
   const isDemoMode = useDemoMode()
   const [filterLawyer, setFilterLawyer] = useState('all')
   const [filterType, setFilterType] = useState('all')
-  const [filterOverdue, setFilterOverdue] = useState(false)
   const [filterPendingRenewal, setFilterPendingRenewal] = useState(false)
 
   const lawyers = ['all', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
@@ -195,14 +194,10 @@ export default function CaseView() {
     return allCases.filter((c) => {
       if (filterLawyer !== 'all' && c.lawyer !== filterLawyer) return false
       if (filterType !== 'all' && c.type !== filterType) return false
-      if (filterOverdue) {
-        const cs = getCloseStatus(c.expectedCloseDate, c.status)
-        if (!cs || cs.label !== '已逾期') return false
-      }
       if (filterPendingRenewal && c.status !== 'pending_renewal') return false
       return true
     })
-  }, [allCases, filterLawyer, filterType, filterOverdue, filterPendingRenewal])
+  }, [allCases, filterLawyer, filterType, filterPendingRenewal])
 
   const byStatus = useMemo(() => {
     const map = {}
@@ -211,7 +206,6 @@ export default function CaseView() {
     return map
   }, [filtered])
 
-  const overdueTotal = allCases.filter((c) => getCloseStatus(c.expectedCloseDate, c.status)?.label === '已逾期').length
   const pendingRenewalTotal = allCases.filter((c) => c.status === 'pending_renewal').length
 
   return (
@@ -242,13 +236,6 @@ export default function CaseView() {
             {CASE_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           </select>
         </div>
-
-        <button onClick={() => setFilterOverdue((v) => !v)}
-          className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
-            filterOverdue ? 'bg-red-500 border-red-500 text-white font-semibold' : 'border-gray-200 text-gray-500 hover:border-red-400 hover:text-red-500'
-          }`}>
-          {filterOverdue ? '✕ 僅顯示已逾期' : `僅顯示已逾期${overdueTotal > 0 ? `（${overdueTotal}）` : ''}`}
-        </button>
 
         <button onClick={() => setFilterPendingRenewal((v) => !v)}
           className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
