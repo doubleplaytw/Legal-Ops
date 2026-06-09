@@ -402,7 +402,7 @@ export default function Dashboard() {
             lastMonth={MOCK_KPI.monthlyRevenueLastMonth}
             unit="萬"
             color="#E8A020"
-            className="col-span-6"
+            className="col-span-12 md:col-span-6"
           />
           <GoalCard
             title="本月轉換率目標"
@@ -412,7 +412,7 @@ export default function Dashboard() {
             lastMonth={MOCK_KPI.conversionRateLastMonth}
             unit="%"
             color="#2E56C8"
-            className="col-span-6"
+            className="col-span-12 md:col-span-6"
           />
 
           {/* ── Row 2：三漏斗圖 ──────────────────────────────────────────── */}
@@ -429,10 +429,10 @@ export default function Dashboard() {
 
           {/* ── Row 3：諮詢時數 + 確定委任 ───────────────────────────────── */}
 
-          <ChartCard title="諮詢案件時數分布" className="col-span-6 self-start">
+          <ChartCard title="諮詢案件時數分布" className="col-span-12 md:col-span-6 self-start">
             <HBarChart data={MOCK_CONSULTATION_HOURS} valueKey="hours" unit=" 小時" />
           </ChartCard>
-          <ChartCard title="確定委任案件" className="col-span-6 self-start h-[416px]">
+          <ChartCard title="確定委任案件" className="col-span-12 md:col-span-6 self-start h-[416px]">
             <CasePieChart data={retainedData} />
           </ChartCard>
 
@@ -454,10 +454,10 @@ export default function Dashboard() {
 
           {/* ── Row 5：營收分布 + 帳務 KPI ───────────────────────────────── */}
 
-          <ChartCard title="本月營收分布" className="col-span-6">
+          <ChartCard title="本月營收分布" className="col-span-12 md:col-span-6">
             <HBarChart data={MOCK_QUARTERLY_REVENUE} valueKey="amount" formatFn={(v) => `${Math.round(v / 10000)} 萬`} />
           </ChartCard>
-          <div className="col-span-6 flex flex-col gap-4 self-stretch">
+          <div className="col-span-12 md:col-span-6 flex flex-col gap-4 self-stretch">
             <div className="grid grid-cols-2 gap-4">
               <KpiCard label="尚未請款數量"       value={MOCK_KPI.uninvoiced}     unit="件" sub="與上月比較" trend={MOCK_KPI.uninvoicedTrend}     amount={MOCK_KPI.uninvoicedAmount}     amountPrimary />
               <KpiCard label="已請款尚未付款數量" value={MOCK_KPI.invoicedUnpaid} unit="件" sub="與上月比較" trend={MOCK_KPI.invoicedUnpaidTrend} amount={MOCK_KPI.invoicedUnpaidAmount} amountPrimary />
@@ -474,7 +474,7 @@ export default function Dashboard() {
             />
           </div>
 
-          <ChartCard title="下一個事件時間點" className="col-span-6 h-[330px]">
+          <ChartCard title="下一個事件時間點" className="col-span-12 md:col-span-6 h-[330px]">
             <div className="flex-1 min-h-0 overflow-y-auto flex flex-col divide-y divide-gray-50 pr-1">
               {allEvents.map((item) => {
                 const cat = DEADLINE_CATEGORIES[item.category]
@@ -506,7 +506,7 @@ export default function Dashboard() {
               })}
             </div>
           </ChartCard>
-          <div className="col-span-6 grid grid-cols-2 gap-4 self-stretch">
+          <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4 self-stretch">
             <KpiCard label="上訴待委任"     value={judgmentPendingCases.length} unit="件" variant={judgmentPendingCases.length > 0 ? 'warning' : undefined} />
             <KpiCard label="常年合約待續約" value={retainerPendingCases.length} unit="件" variant={retainerPendingCases.length > 0 ? 'warning' : undefined} />
             <KpiCard label="事件已逾期"     value={eventOverdueCount}           unit="件" variant={eventOverdueCount > 0 ? 'danger'  : undefined} />
