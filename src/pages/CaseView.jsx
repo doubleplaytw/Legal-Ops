@@ -184,7 +184,7 @@ export default function CaseView() {
   const isDemoMode = useDemoMode()
   const [filterLawyer, setFilterLawyer] = useState('all')
   const [filterType, setFilterType] = useState('all')
-  const [filterPendingRenewal, setFilterPendingRenewal] = useState(false)
+  const [filterStatus, setFilterStatus] = useState('all')
 
   const lawyers = ['all', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
 
@@ -194,10 +194,10 @@ export default function CaseView() {
     return allCases.filter((c) => {
       if (filterLawyer !== 'all' && c.lawyer !== filterLawyer) return false
       if (filterType !== 'all' && c.type !== filterType) return false
-      if (filterPendingRenewal && c.status !== 'pending_renewal') return false
+      if (filterStatus !== 'all' && c.status !== filterStatus) return false
       return true
     })
-  }, [allCases, filterLawyer, filterType, filterPendingRenewal])
+  }, [allCases, filterLawyer, filterType, filterStatus])
 
   const byStatus = useMemo(() => {
     const map = {}
@@ -205,8 +205,6 @@ export default function CaseView() {
     filtered.forEach((c) => { if (map[c.status]) map[c.status].push(c) })
     return map
   }, [filtered])
-
-  const pendingRenewalTotal = allCases.filter((c) => c.status === 'pending_renewal').length
 
   return (
     <div className="px-4 md:px-8 py-4 md:py-8 flex flex-col gap-6 h-full">
@@ -237,12 +235,14 @@ export default function CaseView() {
           </select>
         </div>
 
-        <button onClick={() => setFilterPendingRenewal((v) => !v)}
-          className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${
-            filterPendingRenewal ? 'bg-amber-500 border-amber-500 text-white font-semibold' : 'border-gray-200 text-gray-500 hover:border-amber-400 hover:text-amber-600'
-          }`}>
-          {filterPendingRenewal ? '✕ 僅顯示待續委' : `僅顯示待續委${pendingRenewalTotal > 0 ? `（${pendingRenewalTotal}）` : ''}`}
-        </button>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500">階段</label>
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+            className={SELECT_CLS}>
+            <option value="all">全部階段</option>
+            {CASE_STATUSES.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
+          </select>
+        </div>
 
         <span className="text-xs text-gray-400 ml-auto">共 {filtered.length} 件</span>
       </div>
