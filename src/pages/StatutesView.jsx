@@ -218,26 +218,26 @@ export default function StatutesView({ links = [], onLink }) {
         <div className="mb-1 h-px flex-1 bg-gradient-to-r from-[#1E3480]/20 to-transparent" />
       </div>
 
-      {/* Type summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 shrink-0">
+      {/* Type summary cards — mobile: horizontal scroll, desktop: grid */}
+      <div className="flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden shrink-0 md:grid md:grid-cols-4 md:gap-3 md:overflow-visible md:pb-0">
         {STATUTE_TYPES.map((type) => (
           <button
             key={type}
             onClick={() => setFilterType(filterType === type ? 'all' : type)}
-            className={`rounded-xl border px-4 py-3 text-left transition-all ${
+            className={`shrink-0 w-28 md:w-auto rounded-xl border px-3 md:px-4 py-2.5 md:py-3 text-left transition-all ${
               filterType === type
                 ? 'bg-[#1E3480] border-[#1E3480] shadow-md'
                 : 'bg-white border-gray-100 shadow-sm hover:shadow-md'
             }`}
           >
-            <p className={`text-xs font-semibold mb-1 ${filterType === type ? 'text-white/70' : 'text-gray-400'}`}>
+            <p className={`text-xs font-semibold mb-0.5 md:mb-1 ${filterType === type ? 'text-white/70' : 'text-gray-400'}`}>
               {type}
             </p>
-            <p className={`text-2xl font-bold ${filterType === type ? 'text-white' : 'text-[#1E3480]'}`}>
+            <p className={`text-xl md:text-2xl font-bold ${filterType === type ? 'text-white' : 'text-[#1E3480]'}`}>
               {countByType[type]}
             </p>
             <p className={`text-xs mt-0.5 ${filterType === type ? 'text-white/50' : 'text-gray-300'}`}>
-              筆資料
+              筆
             </p>
           </button>
         ))}

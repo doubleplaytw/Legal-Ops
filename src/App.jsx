@@ -148,15 +148,15 @@ function App() {
         </main>
       </div>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 flex">
+      {/* Mobile bottom nav — horizontal scroll */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 flex overflow-x-auto [&::-webkit-scrollbar]:hidden">
         {NAV_ITEMS.map((item) => {
           const isActive = activePage === item.key
           return (
             <button
               key={item.key}
               onClick={() => setActivePage(item.key)}
-              className={`relative flex-1 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
+              className={`relative shrink-0 w-16 flex flex-col items-center justify-center py-2.5 gap-1 transition-colors ${
                 isActive ? 'text-[#1E3480]' : 'text-gray-400'
               }`}
             >
